@@ -82,6 +82,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>rabbitMq-scheduler</finalName>
 	</build>
 
 </project>
