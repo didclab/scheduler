@@ -7,13 +7,14 @@ import lombok.NonNull;
 import lombok.experimental.Accessors;
 
 import java.util.HashSet;
-
 @Data
 @NoArgsConstructor
 @Accessors(chain = true)
-public class TransferJobRequest {
-    @NonNull protected Source source;
-    @NonNull protected Destination destination;
+public class TransferJobRequestTransferNode {
+
+    @NonNull
+    protected com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest.Source source;
+    @NonNull protected com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest.Destination destination;
     protected TransferOptions options;
 
 
@@ -22,26 +23,20 @@ public class TransferJobRequest {
     public static class Destination {
         @NonNull protected EndPointType type;
         @NonNull protected String credId;
-        @NonNull protected EntityInfo info;
-        protected EndpointCredential credential;
+        @NonNull protected com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest.EntityInfo info;
     }
 
     @Data
     @Accessors(chain = true)
+    @NoArgsConstructor
     public static class Source {
         @NonNull protected EndPointType type;
         @NonNull protected String credId;
-        @NonNull protected EntityInfo info;
-        @NonNull protected HashSet<EntityInfo> infoList;
-        protected EndpointCredential credential;
+        @NonNull protected TransferJobRequest.EntityInfo info;
+        @NonNull protected HashSet<TransferJobRequest.EntityInfo> infoList;
+
+
     }
 
-    @Data
-    @Accessors(chain = true)
-    public static class EntityInfo {
-        protected String id;
-        protected String path;
-        protected long size;
-    }
 
 }

@@ -12,12 +12,12 @@ public class TransferJobRequestWithMetaData{
     private String ownerId;
     public String id;
 
-    @NonNull protected TransferJobRequest.Source source;
+    protected TransferJobRequest.@NonNull Source source;
     @NonNull protected TransferJobRequest.Destination destination;
     protected TransferOptions options;
 
     public static TransferJobRequestWithMetaData getTransferRequestWithMetaData(String owner,
-                                                                                TransferJobRequest request){
+                                                                                TransferJobRequestTransferNode request){
         TransferJobRequestWithMetaData requestWithMetaData = new TransferJobRequestWithMetaData();
         requestWithMetaData.ownerId = owner;
         requestWithMetaData.source = request.getSource();
