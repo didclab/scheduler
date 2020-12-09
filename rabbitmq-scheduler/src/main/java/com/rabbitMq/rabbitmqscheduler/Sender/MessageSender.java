@@ -37,5 +37,6 @@ public class MessageSender {
         MqMessage message = new MqMessage(json,1,false);
         rabbitTemplate.convertAndSend(RabbitmqSchedulerApplication.EXCHANGE_NAME, RabbitmqSchedulerApplication.ROUTING_KEY, message);
         log.info("TransferRequest sent");
+        log.info(json);
     }
 }

@@ -2,7 +2,7 @@ package com.rabbitMq.rabbitmqscheduler.DTO;
 
 public class EndpointCredential {
     protected String accountId;
-    protected String passWord;
+    protected String password;
 
     public String getAccountId() {
         return accountId;
@@ -12,11 +12,19 @@ public class EndpointCredential {
         this.accountId = accountId;
     }
 
-    public String getPassWord(){
-        return passWord;
+    public String getPassword(){
+        return password;
     }
 
-    public void setPassWord(String passWord){
-        this.passWord = passWord;
+    public void setPassword(String password){
+        this.password = password;
+    }
+
+    @Override
+    public String toString() {
+        return "EndpointCredential{" +
+                "accountId='" + accountId + '\'' +
+                ", passWord='" + password + '\'' +
+                '}';
     }
 }
