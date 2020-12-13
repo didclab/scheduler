@@ -16,10 +16,10 @@ public class MessageSender {
     @Autowired
     private AmqpTemplate rmqTemplate;
 
-    @Value("${javainuse.rabbitmq.exchange}")
+    @Value("${ods.rabbitmq.exchange}")
     private String exchange;
 
-    @Value("${javainuse.rabbitmq.routingkey}")
+    @Value("${ods.rabbitmq.routingkey}")
     private String routingkey;
 
     public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
