@@ -1,47 +1,59 @@
 package com.rabbitMq.rabbitmqscheduler.DTO;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
-import lombok.experimental.Accessors;
+import lombok.*;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 
 @Data
 @NoArgsConstructor
-@Accessors(chain = true)
+@Getter
+@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = TransferJobRequest.class)
 public class TransferJobRequest {
-    @NonNull protected Source source;
-    @NonNull protected Destination destination;
-    protected TransferOptions options;
 
+
+    private String jobId;
+    private String ownerId;
+
+    private int priority;
+
+    private int chunkSize;
+    private Source source;
+    private Destination destination;
+    private TransferOptions options;
+
+    public TransferJobRequest(String jobId, String ownerId, int priority, int chunkSize) {
+        this.jobId = jobId;
+        this.ownerId = ownerId;
+        this.priority = priority;
+        this.chunkSize = chunkSize;
+    }
 
     @Data
-    @Accessors(chain = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Destination {
-        @NonNull protected EndPointType type;
-        @NonNull protected String credId;
-        @NonNull protected EntityInfo info;
-        protected EndpointCredential credential;
+
+
+        private EndPointType type;
+        private AccountEndpointCredential vfsDestCredential;
+        private OAuthEndpointCredential oauthDestCredential;
+        private EntityInfo parentInfo;
     }
 
     @Data
-    @Accessors(chain = true)
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class Source {
-        @NonNull protected EndPointType type;
-        @NonNull protected String credId;
-        @NonNull protected EntityInfo info;
-        @NonNull protected HashSet<EntityInfo> infoList;
-        protected EndpointCredential credential;
-    }
 
-    @Data
-    @Accessors(chain = true)
-    public static class EntityInfo {
-        protected String id;
-        protected String path;
-        protected long size;
+        private EndPointType type;
+        private AccountEndpointCredential vfsSourceCredentail;
+        private OAuthEndpointCredential oauthSourceCredential;
+        private EntityInfo parentInfo;
+        private ArrayList<EntityInfo> infoList;
     }
-
 }
