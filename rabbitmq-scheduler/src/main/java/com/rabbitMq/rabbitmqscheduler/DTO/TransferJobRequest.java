@@ -52,7 +52,7 @@ public class TransferJobRequest {
     public static class Source {
 
         private EndPointType type;
-        private AccountEndpointCredential vfsSourceCredentail;
+        private AccountEndpointCredential vfsSourceCredential;
         private OAuthEndpointCredential oauthSourceCredential;
         private EntityInfo parentInfo;
         private ArrayList<EntityInfo> infoList;

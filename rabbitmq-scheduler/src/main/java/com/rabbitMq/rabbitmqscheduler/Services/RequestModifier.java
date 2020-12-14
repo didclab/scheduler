@@ -54,7 +54,7 @@ public class RequestModifier {
         logger.info("Destination type is : " + odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
             AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getSource().getType());
-            s.setVfsSourceCredentail(sourceCred);
+            s.setVfsSourceCredential(sourceCred);
         } else {
             OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getSource().getType());
             s.setOauthSourceCredential(sourceCred);
