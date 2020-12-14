@@ -1,6 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Controller;
 
-import com.rabbitMq.rabbitmqscheduler.DTO.RequestFromODS;
+import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Sender.MessageSender;
 import com.rabbitMq.rabbitmqscheduler.Services.RequestModifier;
