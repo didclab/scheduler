@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class TransferJobRequest {
 
 
-    private String jobId;
+    private String id;
     private String ownerId;
 
     private int priority;
@@ -27,8 +27,8 @@ public class TransferJobRequest {
     private Destination destination;
     private TransferOptions options;
 
-    public TransferJobRequest(String jobId, String ownerId, int priority, int chunkSize) {
-        this.jobId = jobId;
+    public TransferJobRequest(String id, String ownerId, int priority, int chunkSize) {
+        this.id = id;
         this.ownerId = ownerId;
         this.priority = priority;
         this.chunkSize = chunkSize;

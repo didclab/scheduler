@@ -35,10 +35,10 @@ public class RequestModifier {
         logger.info("Creating request for Transfer Service");
 
         TransferJobRequest transferJobRequest = new TransferJobRequest();
-        transferJobRequest.setJobId(odsTransferRequest.getId());
+        transferJobRequest.setId(odsTransferRequest.getId());
         transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
         transferJobRequest.setOptions(odsTransferRequest.getOptions());
-        transferJobRequest.setOwnerId(odsTransferRequest.getAccountId());
+        transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
         transferJobRequest.setPriority(1);
 
         TransferJobRequest.Source s = new TransferJobRequest.Source();
