@@ -35,7 +35,7 @@ public class RequestModifier {
         logger.info("Creating request for Transfer Service");
 
         TransferJobRequest transferJobRequest = new TransferJobRequest();
-        transferJobRequest.setId(odsTransferRequest.getId());
+        transferJobRequest.setJobId(odsTransferRequest.getId());
         transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
         transferJobRequest.setOptions(odsTransferRequest.getOptions());
         transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
