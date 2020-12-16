@@ -13,8 +13,6 @@ public class RequestFromODS {
 
     private String id;
     @NonNull
-    private String accountId;
-    @NonNull
     private String userId;
     private long chunkSize;
     @NonNull
@@ -29,6 +27,8 @@ public class RequestFromODS {
     public static class Source {
 
         @NonNull
+        private String accountId;
+        @NonNull
         private EndPointType type;
         @NonNull
         private EntityInfo parentInfo;
@@ -40,6 +40,8 @@ public class RequestFromODS {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Destination {
+        @NonNull
+        private String accountId;
         @NonNull
         private EndPointType type;
         @NonNull

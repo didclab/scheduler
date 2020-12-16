@@ -53,17 +53,17 @@ public class RequestModifier {
         logger.info("Source type is : " + odsTransferRequest.getSource().getType());
         logger.info("Destination type is : " + odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getSource().getType());
+            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
             s.setVfsSourceCredential(sourceCred);
         } else {
-            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getSource().getType());
+            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
             s.setOauthSourceCredential(sourceCred);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getDestination().getType());
+            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
             d.setVfsDestCredential(destCred);
         } else {
-            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getAccountId(), odsTransferRequest.getDestination().getType());
+            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
             d.setOauthDestCredential(destCred);
         }
 
