@@ -27,20 +27,17 @@ public class RequestModifier {
     @Value("${cred.service.uri}")
     String credBaseUri;
 
-
-    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs"}));
+    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 //    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"s3", "dropbox", "box", "gdrive", "gftp"}));
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
         logger.info("Creating request for Transfer Service");
-
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId(odsTransferRequest.getId());
         transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
         transferJobRequest.setOptions(odsTransferRequest.getOptions());
         transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
         transferJobRequest.setPriority(1);
-
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());

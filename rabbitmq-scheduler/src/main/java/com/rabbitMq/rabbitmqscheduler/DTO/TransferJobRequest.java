@@ -15,8 +15,6 @@ import java.util.ArrayList;
 @Getter
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = TransferJobRequest.class)
 public class TransferJobRequest {
-
-
     private String jobId;
     private String ownerId;
 
@@ -34,12 +32,12 @@ public class TransferJobRequest {
         this.chunkSize = chunkSize;
     }
 
+
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Destination {
-
-
         private EndPointType type;
         private AccountEndpointCredential vfsDestCredential;
         private OAuthEndpointCredential oauthDestCredential;
@@ -50,7 +48,6 @@ public class TransferJobRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Source {
-
         private EndPointType type;
         private AccountEndpointCredential vfsSourceCredential;
         private OAuthEndpointCredential oauthSourceCredential;
