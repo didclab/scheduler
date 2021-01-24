@@ -24,8 +24,7 @@ public class RequestFromODS {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Source {
-
+    public class Source {
         @NonNull
         private String accountId;
         @NonNull
@@ -39,7 +38,7 @@ public class RequestFromODS {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class Destination {
+    public class Destination {
         @NonNull
         private String accountId;
         @NonNull
