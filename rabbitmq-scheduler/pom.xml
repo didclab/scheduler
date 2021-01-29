@@ -15,7 +15,7 @@
     <description>Demo project for Spring Boot</description>
 
     <properties>
-        <java.version>1.11</java.version>
+        <java.version>11</java.version>
     </properties>
 
     <dependencies>
@@ -47,6 +47,12 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jcraft</groupId>
+            <artifactId>jsch</artifactId>
+            <version>0.1.55</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
