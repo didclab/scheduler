@@ -9,8 +9,10 @@ import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -23,6 +25,9 @@ import java.util.Set;
 @Service
 public class RequestModifier {
     private static final Logger logger = LoggerFactory.getLogger(RequestModifier.class);
+
+    @Autowired
+    RestTemplate restTemplate;
 
     @Value("${cred.service.uri}")
     String credBaseUri;
@@ -92,20 +97,21 @@ public class RequestModifier {
 
     private AccountEndpointCredential getNonOautCred(String userId, String accountId, EndPointType type) {
         logger.info("Geeting nonOauth cred from cred service for : " + userId);
-        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-        AccountEndpointCredential accountEndpointCredential = null;
+        String urlToRead = "http://" + "Endpoint_Credential_Service/" + userId + "/" + type + "/" + accountId;
+//        AccountEndpointCredential accountEndpointCredential = null;
 
-        String jsongString = getResponseFromCred(urlToRead);
-        logger.info("jsonString is : " + jsongString);
+//        String jsongString = getResponseFromCred(urlToRead);
+        logger.info("urlToRead is : " + urlToRead);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            accountEndpointCredential = objectMapper.readValue(jsongString, AccountEndpointCredential.class);
-        } catch (JsonProcessingException e) {
-            logger.error("Not able to parse nonOauth cred json");
-            e.printStackTrace();
-        }
-        return accountEndpointCredential;
+//        ObjectMapper objectMapper = new ObjectMapper();
+        return restTemplate.getForObject(urlToRead, AccountEndpointCredential.class);
+//        try {
+//            accountEndpointCredential = objectMapper.readValue(jsongString, AccountEndpointCredential.class);
+//        } catch (JsonProcessingException e) {
+//            logger.error("Not able to parse nonOauth cred json");
+//            e.printStackTrace();
+//        }
+//        return accountEndpointCredential;
     }
 
     private String getResponseFromCred(String urlToRead) {

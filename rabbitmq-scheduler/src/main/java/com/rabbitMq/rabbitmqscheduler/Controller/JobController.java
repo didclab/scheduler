@@ -25,5 +25,6 @@ public class JobController {
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
         messageSender.sendTransferRequest(transferJobRequest);
         return "Message pushed to queue seuccesfully";
+
     }
 }
