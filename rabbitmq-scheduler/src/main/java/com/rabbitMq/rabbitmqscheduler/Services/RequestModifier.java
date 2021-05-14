@@ -2,7 +2,10 @@ package com.rabbitMq.rabbitmqscheduler.Services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.discovery.converters.Auto;
+import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
@@ -17,124 +20,138 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class RequestModifier {
     private static final Logger logger = LoggerFactory.getLogger(RequestModifier.class);
 
     @Autowired
-    RestTemplate restTemplate;
+    CredentialService credentialService;
 
-    @Value("${cred.service.uri}")
-    String credBaseUri;
+//    @Value("${cred.service.uri}")
+//    String credBaseUri;
 
+    @Autowired
+    FTPExpander ftpExpander;
 
-    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs"}));
-//    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"s3", "dropbox", "box", "gdrive", "gftp"}));
+    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
+//    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
+
+    public List<EntityInfo> selectAndExpand(EndPointType type, EndpointCredential credential, List<EntityInfo> selectedResources, String basePath){
+        switch (type){
+            case ftp:
+                ftpExpander.setCredential(EndpointCredential.getAccountCredential(credential));
+                ftpExpander.createClient(selectedResources);
+                return ftpExpander.expandedFileSystem(basePath);
+            case s3:
+                return null;
+            case sftp:
+                return null;
+            case box:
+                return null;
+            case gftp:
+                return null;
+            case http:
+                return null;
+            case dropbox:
+                return null;
+            case gdrive:
+                return null;
+            case vfs:
+                return null;
+        }
+        return null;
+    }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
-        logger.info("Creating request for Transfer Service");
-
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId(odsTransferRequest.getId());
         transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
         transferJobRequest.setOptions(odsTransferRequest.getOptions());
         transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
         transferJobRequest.setPriority(1);
-
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
-
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
-
-        logger.info("Source type is : " + odsTransferRequest.getSource().getType());
-        logger.info("Destination type is : " + odsTransferRequest.getDestination().getType());
+        EndpointCredential sourceCredential;
+        EndpointCredential destinationCredential;
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            s.setVfsSourceCredential(sourceCred);
+//            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
+            sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
         } else {
-            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            s.setOauthSourceCredential(sourceCred);
+//            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
+            sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            s.setOauthSourceCredential(EndpointCredential.getOAuthCredential(sourceCredential));
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            d.setVfsDestCredential(destCred);
+//            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
+            destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
         } else {
-            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            d.setOauthDestCredential(destCred);
+//            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
+            destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
         }
-
+        List<EntityInfo> expandedFiles = selectAndExpand(s.getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());
+        s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
-
         return transferJobRequest;
     }
 
-    private OAuthEndpointCredential getOautCred(String userId, String accountId, EndPointType type) {
-        logger.info("Getting Oauth cred from cred service for : " + userId);
-        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-        OAuthEndpointCredential oAuthEndpointCredential = null;
-
-        String jsonString = getResponseFromCred(urlToRead);
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            oAuthEndpointCredential = objectMapper.readValue(jsonString, OAuthEndpointCredential.class);
-        } catch (JsonProcessingException e) {
-            logger.error("Not able to parse nonOauth cred json");
-            e.printStackTrace();
-        }
-        return oAuthEndpointCredential;
-    }
-
-    private AccountEndpointCredential getNonOautCred(String userId, String accountId, EndPointType type) {
-        logger.info("Geeting nonOauth cred from cred service for : " + userId);
-        String urlToRead = "http://" + "Endpoint_Credential_Service/" + userId + "/" + type + "/" + accountId;
-//        AccountEndpointCredential accountEndpointCredential = null;
-
-//        String jsongString = getResponseFromCred(urlToRead);
-        logger.info("urlToRead is : " + urlToRead);
-
+//    private OAuthEndpointCredential getOautCred(String userId, String accountId, EndPointType type) {
+//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
+//        OAuthEndpointCredential oAuthEndpointCredential = null;
+//        String jsonString = getResponseFromCred(urlToRead);
 //        ObjectMapper objectMapper = new ObjectMapper();
-        return restTemplate.getForObject(urlToRead, AccountEndpointCredential.class);
+//        try {
+//            oAuthEndpointCredential = objectMapper.readValue(jsonString, OAuthEndpointCredential.class);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//        return oAuthEndpointCredential;
+//    }
+//
+//    private AccountEndpointCredential getNonOautCred(String userId, String accountId, EndPointType type) {
+//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
+//        AccountEndpointCredential accountEndpointCredential = null;
+//        String jsongString = getResponseFromCred(urlToRead);
+//        ObjectMapper objectMapper = new ObjectMapper();
 //        try {
 //            accountEndpointCredential = objectMapper.readValue(jsongString, AccountEndpointCredential.class);
 //        } catch (JsonProcessingException e) {
-//            logger.error("Not able to parse nonOauth cred json");
 //            e.printStackTrace();
 //        }
 //        return accountEndpointCredential;
-    }
-
-    private String getResponseFromCred(String urlToRead) {
-        logger.info("Hitting cred service with url : " + urlToRead);
-        StringBuilder line = new StringBuilder();
-        try {
-            URL url = new URL(urlToRead);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-            conn.connect();
-            if (conn.getResponseCode() != 200) {
-                logger.error("Not able to retrive nonOauth cred");
-                throw new RuntimeException("HttpResponseCode : " + conn.getResponseCode());
-            } else {
-                Scanner sc = new Scanner(url.openStream());
-                while (sc.hasNext()) {
-                    line.append(sc.nextLine());
-                }
-                sc.close();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return line.toString();
-    }
+//    }
+//
+//    private String getResponseFromCred(String urlToRead) {
+//        logger.info("Hitting cred service with url : " + urlToRead);
+//        StringBuilder line = new StringBuilder();
+//        try {
+//            URL url = new URL(urlToRead);
+//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//            conn.setRequestMethod("GET");
+//            conn.connect();
+//            if (conn.getResponseCode() != 200) {
+//                logger.error("Not able to retrive nonOauth cred");
+//                throw new RuntimeException("HttpResponseCode : " + conn.getResponseCode());
+//            } else {
+//                Scanner sc = new Scanner(url.openStream());
+//                while (sc.hasNext()) {
+//                    line.append(sc.nextLine());
+//                }
+//                sc.close();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return line.toString();
+//    }
 }
