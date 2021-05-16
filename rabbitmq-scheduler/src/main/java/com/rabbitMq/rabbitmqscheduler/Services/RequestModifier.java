@@ -26,6 +26,8 @@ public class RequestModifier {
     SFTPExpander sftpExpander;
     @Autowired
     FTPExpander ftpExpander;
+    @Autowired
+    S3Expander s3Expander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 //    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
@@ -36,7 +38,8 @@ public class RequestModifier {
                 ftpExpander.createClient(credential);
                 return ftpExpander.expandedFileSystem(selectedResources, basePath);
             case s3:
-                return null;
+                s3Expander.createClient(credential);
+                return s3Expander.expandedFileSystem(selectedResources, basePath);
             case sftp:
                 sftpExpander.createClient(credential);
                 return sftpExpander.expandedFileSystem(selectedResources, basePath);
