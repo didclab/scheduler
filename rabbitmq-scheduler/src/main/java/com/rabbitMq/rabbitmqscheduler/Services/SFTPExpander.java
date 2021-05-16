@@ -50,7 +50,6 @@ public class SFTPExpander implements FileExpander {
         }else{
             for (EntityInfo e : userSelectedResources) {
                 String path = basePath + e.getPath();
-                System.out.println(path);
                 Vector<ChannelSftp.LsEntry> fileVector = channelSftp.ls(path);
                 for(ChannelSftp.LsEntry curr: fileVector){
                     entryToFullPath.put(curr, path+curr.getFilename());

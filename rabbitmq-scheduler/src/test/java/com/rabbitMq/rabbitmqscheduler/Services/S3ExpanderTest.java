@@ -12,7 +12,6 @@ public class S3ExpanderTest extends TestCase {
 
     S3Expander testObj;
 
-
     public AccountEndpointCredential createTestCredentials() {
         String S3TESTKEY = System.getenv("AWS_JACOB_S3_KEY");
         String S3TESTSECRET = System.getenv("AWS_JACOB_S3_SECRET");
@@ -42,7 +41,12 @@ public class S3ExpanderTest extends TestCase {
     public void testExpandUsersPrefix(){
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
+        ArrayList<EntityInfo> selectedRes = new ArrayList<>();
+        EntityInfo another = new EntityInfo();
+        another.setPath("Users/");
+        another.setId("Users/");
+        selectedRes.add(another);
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(selectedRes, "");
         Assert.isTrue(expandedBucketFiles.size() == 2 , "The size of Users is 2 which it was not given out");
     }
 

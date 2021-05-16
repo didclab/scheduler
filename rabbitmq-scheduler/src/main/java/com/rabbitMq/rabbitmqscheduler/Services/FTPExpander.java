@@ -9,8 +9,6 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,7 +16,6 @@ import java.util.*;
 @Service
 public class FTPExpander implements FileExpander {
 
-    Logger logger = LoggerFactory.getLogger(FTPExpander.class);
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
 

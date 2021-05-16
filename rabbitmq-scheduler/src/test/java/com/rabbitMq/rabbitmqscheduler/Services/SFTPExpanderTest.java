@@ -24,9 +24,6 @@ public class SFTPExpanderTest extends TestCase {
         File file = new File(path);
         String key = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
         String publicKeyPEM = key;
-//                .replace("-----BEGIN PUBLIC KEY-----", "")
-//                .replaceAll(System.lineSeparator(), "")
-//                .replace("-----END PUBLIC KEY-----", "");
         return publicKeyPEM;
     }
 
@@ -95,9 +92,6 @@ public class SFTPExpanderTest extends TestCase {
         try{
             Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls(".");
             List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "");
-            for(EntityInfo info: expandedList){
-                System.out.println(info.toString());
-            }
         }catch (SftpException sftpException){
             sftpException.printStackTrace();
         }
@@ -107,20 +101,9 @@ public class SFTPExpanderTest extends TestCase {
         testObj.createClient(createTestCredential());
         try{
             Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls("/home/ubuntu/pipeDataSet");
-            for(int i = 0; i < files.size(); i++){
-                System.out.println(files.get(i).toString());
-            }
             List<EntityInfo> expandedList = testObj.expandedFileSystem(listPipeDataSet(), "/home/ubuntu/");
-            int matchedFiles = 0;
-            for(EntityInfo info: expandedList){
-                for(int i = 0; i < files.size(); i++){
-                    if(files.get(i).getFilename() == info.getId()){
-                        matchedFiles++;
-                    }
-                }
-                System.out.println(info.toString());
-            }
-            Assert.isTrue(matchedFiles == 22, "The number of listed files is greater or less than the files in pipeDataSet on SFTP US West");
+            int totalInFiles = files.size() -2;//the reason for this is we will get back "." and "..";
+            Assert.isTrue(expandedList.size() == totalInFiles, "The number of listed files is greater or less than the files in pipeDataSet on SFTP US West");
         }catch (SftpException sftpException){
             sftpException.printStackTrace();
         }
@@ -144,9 +127,6 @@ public class SFTPExpanderTest extends TestCase {
         testObj.createClient(createTestCredential());
         List<EntityInfo> expandedList = testObj.expandedFileSystem(listTestDir(), "/home/ubuntu/");
         Assert.isTrue(expandedList.size() == 3, "The size should be 3 ");
-        for(EntityInfo info: expandedList){
-            System.out.println(info.toString());
-        }
     }
 
 
