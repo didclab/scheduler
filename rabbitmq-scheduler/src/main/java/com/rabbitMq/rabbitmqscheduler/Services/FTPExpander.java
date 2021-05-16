@@ -9,6 +9,8 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -16,6 +18,7 @@ import java.util.*;
 @Service
 public class FTPExpander implements FileExpander {
 
+    Logger logger = LoggerFactory.getLogger(FTPExpander.class);
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
 
@@ -47,6 +50,7 @@ public class FTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<FileObject> traversalStack = new Stack<>();
         FileSystemManager fsm = VFS.getManager();
+        if(basePath.isEmpty()) basePath = "/";
         if(infoList.isEmpty()){
             FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, generateOpts());
             traversalStack.push(obj);
@@ -62,15 +66,17 @@ public class FTPExpander implements FileExpander {
                 traversalStack.addAll(Arrays.asList(curr.getChildren()));
                 //Add empty folders as well
                 if (curr.getChildren().length == 0) {
+                    String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                     EntityInfo fileInfo = new EntityInfo();
                     fileInfo.setId(curr.getName().getBaseName());
-                    fileInfo.setPath(curr.getPath().toString());
+                    fileInfo.setPath(filePath);
                     filesToTransferList.add(fileInfo);
                 }
             } else if (curr.getType() == FileType.FILE) {
+                String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                 EntityInfo fileInfo = new EntityInfo();
-                fileInfo.setId(curr.getName().getBaseName());//this is the only part I am not sure of
-                fileInfo.setPath(curr.getPath().toString());
+                fileInfo.setId(curr.getName().getBaseName());
+                fileInfo.setPath(filePath);
                 fileInfo.setSize(curr.getContent().getSize());
                 filesToTransferList.add(fileInfo);
             }

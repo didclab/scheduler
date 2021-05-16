@@ -24,8 +24,6 @@ public class RabbitMQConfig {
     @Value("${ods.rabbitmq.exchange}")
     String exchange;
 
-
-
     @Value("${ods.rabbitmq.routingkey}")
     private String routingkey;
 
