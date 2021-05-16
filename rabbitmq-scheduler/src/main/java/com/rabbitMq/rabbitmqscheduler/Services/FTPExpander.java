@@ -62,17 +62,15 @@ public class FTPExpander implements FileExpander {
                 traversalStack.addAll(Arrays.asList(curr.getChildren()));
                 //Add empty folders as well
                 if (curr.getChildren().length == 0) {
-                    String filePath = curr.getPublicURIString().substring(basePath.length());
                     EntityInfo fileInfo = new EntityInfo();
                     fileInfo.setId(curr.getName().getBaseName());
-                    fileInfo.setPath(filePath);
+                    fileInfo.setPath(curr.getPath().toString());
                     filesToTransferList.add(fileInfo);
                 }
             } else if (curr.getType() == FileType.FILE) {
-                String filePath = curr.getPublicURIString().substring(basePath.length());
                 EntityInfo fileInfo = new EntityInfo();
                 fileInfo.setId(curr.getName().getBaseName());//this is the only part I am not sure of
-                fileInfo.setPath(filePath);
+                fileInfo.setPath(curr.getPath().toString());
                 fileInfo.setSize(curr.getContent().getSize());
                 filesToTransferList.add(fileInfo);
             }
