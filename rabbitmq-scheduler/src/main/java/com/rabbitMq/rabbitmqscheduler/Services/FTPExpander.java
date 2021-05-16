@@ -19,29 +19,31 @@ public class FTPExpander implements FileExpander {
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
 
-    @Override
-    public void setCredential(EndpointCredential credential) {
-        this.vfsCredential = (AccountEndpointCredential) credential;
+
+    public static FileSystemOptions generateOpts() {
+        FileSystemOptions opts = new FileSystemOptions();
+        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
+        FtpFileSystemConfigBuilder.getInstance().setFileType(opts, FtpFileType.BINARY);
+        FtpFileSystemConfigBuilder.getInstance().setAutodetectUtf8(opts, true);
+        FtpFileSystemConfigBuilder.getInstance().setControlEncoding(opts, "UTF-8");
+        return opts;
     }
 
     @Override
-    public void createClient(List<EntityInfo> userSelectedResources) {
+    public void createClient(EndpointCredential credential) {
+        this.vfsCredential = EndpointCredential.getAccountCredential(credential);
         StaticUserAuthenticator auth = new StaticUserAuthenticator(null, this.vfsCredential.getUsername(), this.vfsCredential.getSecret());
         try {
             DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(generateOpts(), auth);
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
-        if(infoList == null){
-            infoList = new ArrayList<>();
-        }else{
-            infoList = userSelectedResources;
-        }
     }
 
     @SneakyThrows
     @Override
-    public List<EntityInfo> expandedFileSystem(String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+        this.infoList = userSelectedResources;
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<FileObject> traversalStack = new Stack<>();
         FileSystemManager fsm = VFS.getManager();
@@ -77,14 +79,4 @@ public class FTPExpander implements FileExpander {
         }
         return filesToTransferList;
     }
-
-    public static FileSystemOptions generateOpts() {
-        FileSystemOptions opts = new FileSystemOptions();
-        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setFileType(opts, FtpFileType.BINARY);
-        FtpFileSystemConfigBuilder.getInstance().setAutodetectUtf8(opts, true);
-        FtpFileSystemConfigBuilder.getInstance().setControlEncoding(opts, "UTF-8");
-        return opts;
-    }
-
 }

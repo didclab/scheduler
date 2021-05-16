@@ -21,26 +21,18 @@ public class FTPExpanderTest extends TestCase {
         return accountEndpointCredential;
     }
 
-    public void testSetCredential() {
-        testObj = new FTPExpander();
-        testObj.setCredential(testFTPCredential());
-        Assert.notNull(testObj.vfsCredential, "VfsCredential is Null");
-    }
-
     public void testlistAllFilesFromSpeedTest() {
         testObj = new FTPExpander();
-        testObj.setCredential(testFTPCredential());
-        testObj.createClient(createInfoList());
-        List<EntityInfo> fullFiles = testObj.expandedFileSystem("/");
+        testObj.createClient(testFTPCredential());
+        List<EntityInfo> fullFiles = testObj.expandedFileSystem(new ArrayList<>(),"/");
         Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 
     public void testListingOnlyUploadDirectory(){
         testObj = new FTPExpander();
-        testObj.setCredential(testFTPCredential());
-        testObj.createClient(null);
+        testObj.createClient(testFTPCredential());
         createInfoList();
-        List<EntityInfo> fullFiles = testObj.expandedFileSystem("/");
+        List<EntityInfo> fullFiles = testObj.expandedFileSystem(createInfoList(),"/");
         Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 

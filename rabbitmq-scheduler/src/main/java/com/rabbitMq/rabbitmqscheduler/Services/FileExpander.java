@@ -10,9 +10,7 @@ import java.util.List;
 
 public interface FileExpander {
 
-    public void setCredential(EndpointCredential credential);
+    public void createClient(EndpointCredential credential);
 
-    public void createClient(List<EntityInfo> userSelectedResources);
-
-    public List<EntityInfo> expandedFileSystem(String basePath);
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources,String basePath);
 }

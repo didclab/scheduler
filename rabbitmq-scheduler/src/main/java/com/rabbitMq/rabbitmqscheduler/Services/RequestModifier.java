@@ -1,25 +1,15 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.netflix.discovery.converters.Auto;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
-import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
-import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.*;
 
 @Service
@@ -33,6 +23,8 @@ public class RequestModifier {
 //    String credBaseUri;
 
     @Autowired
+    SFTPExpander sftpExpander;
+    @Autowired
     FTPExpander ftpExpander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
@@ -41,13 +33,13 @@ public class RequestModifier {
     public List<EntityInfo> selectAndExpand(EndPointType type, EndpointCredential credential, List<EntityInfo> selectedResources, String basePath){
         switch (type){
             case ftp:
-                ftpExpander.setCredential(EndpointCredential.getAccountCredential(credential));
-                ftpExpander.createClient(selectedResources);
-                return ftpExpander.expandedFileSystem(basePath);
+                ftpExpander.createClient(credential);
+                return ftpExpander.expandedFileSystem(selectedResources, basePath);
             case s3:
                 return null;
             case sftp:
-                return null;
+                sftpExpander.createClient(credential);
+                return sftpExpander.expandedFileSystem(selectedResources, basePath);
             case box:
                 return null;
             case gftp:
