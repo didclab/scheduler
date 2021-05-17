@@ -9,6 +9,7 @@ import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -55,6 +56,6 @@ public class TransferJobRequest {
         private AccountEndpointCredential vfsSourceCredential;
         private OAuthEndpointCredential oauthSourceCredential;
         private EntityInfo parentInfo;
-        private ArrayList<EntityInfo> infoList;
+        private List<EntityInfo> infoList;
     }
 }
