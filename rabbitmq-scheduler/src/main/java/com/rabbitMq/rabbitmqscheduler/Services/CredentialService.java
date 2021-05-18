@@ -41,6 +41,6 @@ public class CredentialService {
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
         OAuthEndpointCredential credential =eurekaTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
         logger.info(credential.toString());
-        return credential
+        return credential;
     }
 }
