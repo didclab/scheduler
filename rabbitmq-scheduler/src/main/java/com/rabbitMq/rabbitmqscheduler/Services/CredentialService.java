@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.netflix.discovery.EurekaClient;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
@@ -17,8 +18,10 @@ public class CredentialService {
     @Value("${cred.service.eureka.uri}")
     String credentialEureka;
 
+
     @Autowired
     RestTemplate restTemplate;
+
 
     @PostConstruct
     public void adjustUrl(){

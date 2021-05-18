@@ -1,5 +1,7 @@
 package com.rabbitMq.rabbitmqscheduler.config;
 
+import com.netflix.discovery.EurekaClient;
+import com.netflix.discovery.EurekaClientConfig;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -52,7 +54,6 @@ public class RabbitMQConfig {
     RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
 
 //    @Bean
 //    public AmqpTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
