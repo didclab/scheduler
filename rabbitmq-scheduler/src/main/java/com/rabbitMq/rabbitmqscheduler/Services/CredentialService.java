@@ -25,6 +25,7 @@ public class CredentialService {
 
     @PostConstruct
     public void adjustUrl(){
+
         credListUrl = credentialEureka+"/{userId}/{type}/{accountId}";
     }
 
