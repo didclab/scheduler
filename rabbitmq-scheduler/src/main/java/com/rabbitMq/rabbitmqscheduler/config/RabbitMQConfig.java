@@ -49,12 +49,11 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-    @LoadBalanced
     @Bean
-    RestTemplate restTemplate() {
+    @LoadBalanced
+    RestTemplate eurekaTemplate() {
         return new RestTemplate();
     }
-
 //    @Bean
 //    public AmqpTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
 //        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);

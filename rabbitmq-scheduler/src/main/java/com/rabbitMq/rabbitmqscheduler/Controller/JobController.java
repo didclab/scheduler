@@ -8,10 +8,7 @@ import com.rabbitMq.rabbitmqscheduler.Services.RequestModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class JobController {
@@ -23,7 +20,7 @@ public class JobController {
     @Autowired
     RequestModifier requestModifier;
 
-    @RequestMapping(value = "/receiveRequest", method = RequestMethod.POST)
+    @PostMapping(value = "/receiveRequest")
     public String receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
         messageSender.sendTransferRequest(transferJobRequest);

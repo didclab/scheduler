@@ -20,7 +20,7 @@ public class CredentialService {
 
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate eurekaTemplate;
 
 
     @PostConstruct
@@ -29,10 +29,10 @@ public class CredentialService {
     }
 
     public AccountEndpointCredential fetchAccountCredential(EndPointType type, String userId, String credId){
-        return restTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
+        return eurekaTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
     }
 
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
-        return restTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
+        return eurekaTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
     }
 }
