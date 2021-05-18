@@ -1,5 +1,7 @@
 FROM maven:3.6.3-jdk-11 AS build
-
+RUN apt-get update
+RUN apk update && apk --no-cache add curl
+RUN curl http://169.254.169.254/latest/meta-data/local-ipv4
 COPY src /home/app/src
 COPY pom.xml /home/app
 RUN mvn -f /home/app/pom.xml clean package -DskipTests
