@@ -42,10 +42,40 @@ public class SFTPExpanderTest extends TestCase {
         return accountEndpointCredential;
     }
 
+    public AccountEndpointCredential createUserPassTestCredential(){
+        AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
+        accountEndpointCredential.setUsername("demo");
+        accountEndpointCredential.setSecret("password");
+        accountEndpointCredential.setUri("test.rebex.net:22");
+        accountEndpointCredential.setAccountId("jacobTest");
+        return accountEndpointCredential;
+    }
+
+    public void testClientWithPassword(){
+        testObj = new SFTPExpander();
+        testObj.createClient(createUserPassTestCredential());
+        Assert.isTrue(testObj.channelSftp != null, "the password authentication failed");
+    }
+
     public void testCreateClientIsNotNull(){
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
         Assert.isTrue(testObj.channelSftp != null);
+    }
+
+    public void testCreateClientWithPasswordIsListing(){
+        testObj = new SFTPExpander();
+        testObj.createClient(createUserPassTestCredential());
+        try{
+            Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls(".");
+            for(ChannelSftp.LsEntry file: files){
+                System.out.println(file.toString());
+            }
+            Assert.notNull(files);
+            Assert.isTrue(files.size() > 0);
+        }catch (SftpException sftpException){
+            sftpException.printStackTrace();
+        }
     }
 
     public void testCreateClientIsListing(){
