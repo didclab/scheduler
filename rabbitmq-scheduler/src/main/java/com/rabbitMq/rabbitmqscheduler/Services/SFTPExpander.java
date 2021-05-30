@@ -15,20 +15,37 @@ public class SFTPExpander implements FileExpander {
     ChannelSftp channelSftp;
     List<EntityInfo> infoList;
 
-    @SneakyThrows
     @Override
     public void createClient(EndpointCredential cred) {
         this.credential = EndpointCredential.getAccountCredential(cred);
+        Session jschSession = null;
         JSch jsch = new JSch();
-        jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
         String[] destCredUri = credential.getUri().split(":");
-        Session jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
-        jschSession.setConfig("StrictHostKeyChecking", "no");
-        jschSession.connect();
-        Channel sftp = jschSession.openChannel("sftp");
-        ChannelSftp channelSftp = (ChannelSftp) sftp;
-        channelSftp.connect();
-        this.channelSftp = channelSftp;
+        try {
+            jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
+            jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
+            jschSession.connect();
+            jschSession.setConfig("StrictHostKeyChecking", "no");
+        } catch (JSchException ignored) {}
+
+        try{
+            jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
+            jschSession.setConfig("StrictHostKeyChecking", "no");
+            jschSession.setPassword(this.credential.getSecret());
+            jschSession.connect();
+        } catch (JSchException ignored) {}
+
+        try {
+            ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
+            channelSftp.connect();
+            this.channelSftp = channelSftp;
+        } catch (JSchException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createClientWithUserPassword(EndpointCredential cred){
+        this.credential = EndpointCredential.getAccountCredential(cred);
     }
 
     @SneakyThrows

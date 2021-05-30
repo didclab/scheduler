@@ -22,6 +22,7 @@ public class JobController {
 
     @PostMapping(value = "/receiveRequest")
     public String receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
+        LOGGER.info("recived a request from " + odsTransferRequest.getUserId());
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
         messageSender.sendTransferRequest(transferJobRequest);
         return "Message pushed to queue";

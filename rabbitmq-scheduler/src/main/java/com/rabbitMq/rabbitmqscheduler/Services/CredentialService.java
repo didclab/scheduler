@@ -20,7 +20,6 @@ public class CredentialService {
     @Value("${cred.service.eureka.uri}")
     String credentialEureka;
 
-
     @Autowired
     RestTemplate eurekaTemplate;
 
