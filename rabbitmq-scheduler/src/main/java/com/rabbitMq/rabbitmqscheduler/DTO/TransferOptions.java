@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.DTO;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class TransferOptions {
     private Boolean compress;
     private Boolean encrypt;
