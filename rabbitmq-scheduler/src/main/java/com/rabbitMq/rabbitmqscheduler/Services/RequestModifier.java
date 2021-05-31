@@ -95,7 +95,7 @@ public class RequestModifier {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
-        List<EntityInfo> expandedFiles = selectAndExpand(transferJobRequest.getSource(), odsTransferRequest.getSource().getInfoList());
+        List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
         logger.info("After expansion service");
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
