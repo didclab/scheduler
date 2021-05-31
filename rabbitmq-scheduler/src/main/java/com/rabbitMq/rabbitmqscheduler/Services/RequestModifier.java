@@ -60,6 +60,7 @@ public class RequestModifier {
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
+        logger.info(odsTransferRequest.toString());
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId(odsTransferRequest.getId());
         transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
