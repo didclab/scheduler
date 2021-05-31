@@ -80,7 +80,6 @@ public class RequestModifier {
         d.setType(odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
             AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
-            logger.info(sourceCredential.toString());
             s.setVfsSourceCredential(sourceCredential);
         } else {
             OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
@@ -88,7 +87,6 @@ public class RequestModifier {
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
             AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
-            logger.info(destinationCredential.toString());
             d.setVfsDestCredential(destinationCredential);
         } else {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
@@ -98,8 +96,24 @@ public class RequestModifier {
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
-        transferJobRequest.setChunkSize(64000);//this is default and needs to come from the optimizer
+        transferJobRequest.setChunkSize(correctChunkSize(transferJobRequest.getDestination().getType(), 6400000));//this is default and needs to come from the optimizer
         logger.info("Processed Job with ID: " + transferJobRequest.getJobId());
         return transferJobRequest;
+    }
+
+    /**
+     * Current little hack to make sure writing to S3 results in a chunkSize greater than 5MB if a multipart request.
+     * This should be a property that is data mined in the optimization service
+     * @param destType
+     * @param chunkSize
+     * @return
+     */
+    public int correctChunkSize(EndPointType destType, int chunkSize){
+        if(destType.equals(EndPointType.s3) && chunkSize < 5000000){ //5MB as we work with bytes not bits!
+            return 10000000;
+        }else{
+            return chunkSize;
+        }
+
     }
 }
