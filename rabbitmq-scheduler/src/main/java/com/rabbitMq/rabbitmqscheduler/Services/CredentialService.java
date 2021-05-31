@@ -31,7 +31,7 @@ public class CredentialService {
 
     public AccountEndpointCredential fetchAccountCredential(EndPointType type, String userId, String credId){
         logger.info(credListUrl);
-        return eurekaTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
+        return eurekaTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type.toString(), credId);
     }
 
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
