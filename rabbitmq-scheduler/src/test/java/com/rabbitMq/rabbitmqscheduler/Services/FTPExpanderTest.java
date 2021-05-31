@@ -15,7 +15,7 @@ public class FTPExpanderTest extends TestCase {
     public AccountEndpointCredential testFTPCredential(){
         AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
         accountEndpointCredential.setAccountId("testuser@helloworld.com");
-        accountEndpointCredential.setAccountId("anonymous");
+        accountEndpointCredential.setUsername("anonymous");
         accountEndpointCredential.setSecret("anonymous");
         accountEndpointCredential.setUri("ftp://speedtest.tele2.net");
         return accountEndpointCredential;

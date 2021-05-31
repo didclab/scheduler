@@ -6,6 +6,7 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
+
 import java.util.*;
 
 @Component
@@ -19,14 +20,34 @@ public class SFTPExpander implements FileExpander {
     @Override
     public void createClient(EndpointCredential cred) {
         this.credential = EndpointCredential.getAccountCredential(cred);
+        Session jschSession = null;
         JSch jsch = new JSch();
-        jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
         String[] destCredUri = credential.getUri().split(":");
-        Session jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
-        jschSession.setConfig("StrictHostKeyChecking", "no");
-        jschSession.connect();
-        Channel sftp = jschSession.openChannel("sftp");
-        ChannelSftp channelSftp = (ChannelSftp) sftp;
+        boolean connected = false;
+        try {
+            jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
+            jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
+            jschSession.connect();
+            jschSession.setConfig("StrictHostKeyChecking", "no");
+            connected = true;
+        } catch (JSchException ignored) {
+            connected = false;
+        }
+        if (!connected) {
+            try {
+                jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
+                jschSession.setConfig("StrictHostKeyChecking", "no");
+                jschSession.setPassword(credential.getSecret());
+                jschSession.connect();
+                connected = true;
+            } catch (JSchException ignored) {
+                connected = false;
+            }
+        }
+        if (!connected) {
+            throw new JSchException("Unable to authenticate with the password/pem file");
+        }
+        ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
         channelSftp.connect();
         this.channelSftp = channelSftp;
     }
@@ -38,41 +59,41 @@ public class SFTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<ChannelSftp.LsEntry> traversalStack = new Stack<>();
         HashMap<ChannelSftp.LsEntry, String> entryToFullPath = new HashMap<>();
-        if(basePath.isEmpty()){
-            basePath= channelSftp.pwd()+"/";
+        if (basePath.isEmpty()) {
+            basePath = channelSftp.pwd() + "/";
         }
-        if(userSelectedResources.isEmpty()){
+        if (userSelectedResources.isEmpty()) {
             Vector<ChannelSftp.LsEntry> fileVector = channelSftp.ls(basePath);
-            for(ChannelSftp.LsEntry curr: fileVector){
-                entryToFullPath.put(curr, basePath+curr.getFilename());
+            for (ChannelSftp.LsEntry curr : fileVector) {
+                entryToFullPath.put(curr, basePath + curr.getFilename());
                 traversalStack.add(curr);
             }
-        }else{
+        } else {
             for (EntityInfo e : userSelectedResources) {
                 String path = basePath + e.getPath();
                 Vector<ChannelSftp.LsEntry> fileVector = channelSftp.ls(path);
-                for(ChannelSftp.LsEntry curr: fileVector){
-                    entryToFullPath.put(curr, path+curr.getFilename());
+                for (ChannelSftp.LsEntry curr : fileVector) {
+                    entryToFullPath.put(curr, path + curr.getFilename());
                     traversalStack.add(curr);
                 }
             }
         }
-        while(!traversalStack.isEmpty()) {
+        while (!traversalStack.isEmpty()) {
             ChannelSftp.LsEntry curr = traversalStack.pop();
             String fullPath = entryToFullPath.remove(curr);
-            if(curr.getFilename().equals(".") || curr.getFilename().equals("..")){ //skip these two
+            if (curr.getFilename().equals(".") || curr.getFilename().equals("..")) { //skip these two
                 continue;
             }
             if (curr.getAttrs().isDir()) {
                 Vector<ChannelSftp.LsEntry> children = channelSftp.ls(fullPath);
-                if(children.size() == 0){//this should include the empty directory
+                if (children.size() == 0) {//this should include the empty directory
                     EntityInfo fileInfo = new EntityInfo();
                     fileInfo.setId(curr.getFilename());
                     fileInfo.setSize(curr.getAttrs().getSize());
                     fileInfo.setPath(fullPath);
-                }else{
+                } else {
                     for (ChannelSftp.LsEntry f : children) {
-                        entryToFullPath.put(f, fullPath+"/"+f.getFilename());
+                        entryToFullPath.put(f, fullPath + "/" + f.getFilename());
                         traversalStack.add(f);
                     }
                 }

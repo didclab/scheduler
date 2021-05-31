@@ -22,7 +22,7 @@ public class TransferOptions {
 
     public static TransferOptions createTransferOptionsFromUser(UserTransferOptions userTransferOptions) {
         return TransferOptions.builder()
-                .compress(userTransferOptions.getCompress())
+                .compress(userTransferOptions.getCompress() == null? false: true)
                 .concurrencyThreadCount(1)
                 .pipeSize(1)
                 .parallelThreadCount(0)

@@ -12,18 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = TransferJobRequest.class)
 public class TransferJobRequest {
-
-
     private String jobId;
     private String ownerId;
-
     private int priority;
-
-    private long chunkSize;
+    private int chunkSize;
     private Source source;
     private Destination destination;
     private TransferOptions options;
@@ -39,8 +37,6 @@ public class TransferJobRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Destination {
-
-
         private EndPointType type;
         private AccountEndpointCredential vfsDestCredential;
         private OAuthEndpointCredential oauthDestCredential;
@@ -51,7 +47,6 @@ public class TransferJobRequest {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Source {
-
         private EndPointType type;
         private AccountEndpointCredential vfsSourceCredential;
         private OAuthEndpointCredential oauthSourceCredential;

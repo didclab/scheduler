@@ -40,8 +40,6 @@ public class RequestModifier {
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
                 logger.info("Expanding FTP");
-                logger.info(selectedResources.toString());
-                logger.info(source.getParentInfo().getPath());
                 return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
                 logger.info("Expanding S3");
@@ -68,16 +66,13 @@ public class RequestModifier {
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
-        logger.info(odsTransferRequest.toString());
         TransferJobRequest transferJobRequest = new TransferJobRequest();
-        transferJobRequest.setJobId(odsTransferRequest.getOwnerId());
+        transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
-        logger.info(odsTransferRequest.getDestination().getParentInfo().toString());
-        logger.info(odsTransferRequest.getSource().getParentInfo().toString());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
@@ -100,60 +95,11 @@ public class RequestModifier {
             d.setOauthDestCredential(destinationCredential);
         }
         List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
-        logger.info("After expansion service");
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
+        transferJobRequest.setChunkSize(64000);//this is default and needs to come from the optimizer
+        logger.info("Processed Job with ID: " + transferJobRequest.getJobId());
         return transferJobRequest;
     }
-
-//    private OAuthEndpointCredential getOautCred(String userId, String accountId, EndPointType type) {
-//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-//        OAuthEndpointCredential oAuthEndpointCredential = null;
-//        String jsonString = getResponseFromCred(urlToRead);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            oAuthEndpointCredential = objectMapper.readValue(jsonString, OAuthEndpointCredential.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        return oAuthEndpointCredential;
-//    }
-//
-//    private AccountEndpointCredential getNonOautCred(String userId, String accountId, EndPointType type) {
-//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-//        AccountEndpointCredential accountEndpointCredential = null;
-//        String jsongString = getResponseFromCred(urlToRead);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            accountEndpointCredential = objectMapper.readValue(jsongString, AccountEndpointCredential.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        return accountEndpointCredential;
-//    }
-//
-//    private String getResponseFromCred(String urlToRead) {
-//        logger.info("Hitting cred service with url : " + urlToRead);
-//        StringBuilder line = new StringBuilder();
-//        try {
-//            URL url = new URL(urlToRead);
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            conn.setRequestMethod("GET");
-//            conn.connect();
-//            if (conn.getResponseCode() != 200) {
-//                logger.error("Not able to retrive nonOauth cred");
-//                throw new RuntimeException("HttpResponseCode : " + conn.getResponseCode());
-//            } else {
-//                Scanner sc = new Scanner(url.openStream());
-//                while (sc.hasNext()) {
-//                    line.append(sc.nextLine());
-//                }
-//                sc.close();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return line.toString();
-//    }
 }
