@@ -40,6 +40,8 @@ public class RequestModifier {
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
                 logger.info("Expanding FTP");
+                logger.info(selectedResources.toString());
+                logger.info(source.getParentInfo().getPath());
                 return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
                 logger.info("Expanding S3");
