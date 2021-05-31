@@ -39,11 +39,14 @@ public class RequestModifier {
         switch (type){
             case ftp:
                 ftpExpander.createClient(credential);
+                logger.info("Expanding FTP");
                 return ftpExpander.expandedFileSystem(selectedResources, basePath);
             case s3:
+                logger.info("Expanding S3");
                 s3Expander.createClient(credential);
                 return s3Expander.expandedFileSystem(selectedResources, basePath);
             case sftp:
+                logger.info("Expanding SFTP");
                 sftpExpander.createClient(credential);
                 return sftpExpander.expandedFileSystem(selectedResources, basePath);
             case box:
@@ -81,6 +84,7 @@ public class RequestModifier {
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
 //            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
             sourceCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            logger.info(sourceCredential.toString());
             s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
         } else {
 //            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
@@ -90,13 +94,15 @@ public class RequestModifier {
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
 //            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
             destinationCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            logger.info(destinationCredential.toString());
             d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
         } else {
 //            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
             destinationCredential = (OAuthEndpointCredential) credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
         }
-        List<EntityInfo> expandedFiles = selectAndExpand(s.getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());
+        List<EntityInfo> expandedFiles = selectAndExpand(odsTransferRequest.getSource().getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());
+        logger.info("After expansion service");
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
