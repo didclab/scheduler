@@ -35,20 +35,20 @@ public class RequestModifier {
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 //    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
 
-    public List<EntityInfo> selectAndExpand(EndPointType type, EndpointCredential credential, List<EntityInfo> selectedResources, String basePath){
-        switch (type){
+    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
+        switch (source.getType()){
             case ftp:
-                ftpExpander.createClient(credential);
+                ftpExpander.createClient(source.getVfsSourceCredential());
                 logger.info("Expanding FTP");
-                return ftpExpander.expandedFileSystem(selectedResources, basePath);
+                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
                 logger.info("Expanding S3");
-                s3Expander.createClient(credential);
-                return s3Expander.expandedFileSystem(selectedResources, basePath);
+                s3Expander.createClient(source.getVfsSourceCredential());
+                return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
                 logger.info("Expanding SFTP");
-                sftpExpander.createClient(credential);
-                return sftpExpander.expandedFileSystem(selectedResources, basePath);
+                sftpExpander.createClient(source.getVfsSourceCredential());
+                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
                 return null;
             case gftp:
@@ -79,29 +79,23 @@ public class RequestModifier {
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
-        EndpointCredential sourceCredential;
-        EndpointCredential destinationCredential;
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-//            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            sourceCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             logger.info(sourceCredential.toString());
-            s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
+            s.setVfsSourceCredential(sourceCredential);
         } else {
-//            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            sourceCredential = (OAuthEndpointCredential) credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
-            s.setOauthSourceCredential(EndpointCredential.getOAuthCredential(sourceCredential));
+            OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            s.setOauthSourceCredential(sourceCredential);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-//            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            destinationCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             logger.info(destinationCredential.toString());
-            d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
+            d.setVfsDestCredential(destinationCredential);
         } else {
-//            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            destinationCredential = (OAuthEndpointCredential) credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
-            d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
+            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            d.setOauthDestCredential(destinationCredential);
         }
-        List<EntityInfo> expandedFiles = selectAndExpand(odsTransferRequest.getSource().getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());
+        List<EntityInfo> expandedFiles = selectAndExpand(transferJobRequest.getSource(), odsTransferRequest.getSource().getInfoList());
         logger.info("After expansion service");
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);

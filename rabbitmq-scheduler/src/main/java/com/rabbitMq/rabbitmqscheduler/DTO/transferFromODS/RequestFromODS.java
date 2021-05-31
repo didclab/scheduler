@@ -44,4 +44,5 @@ public class RequestFromODS {
         @NonNull
         private EntityInfo parentInfo;
     }
+
 }
