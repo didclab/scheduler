@@ -76,6 +76,7 @@ public class RequestModifier {
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
+        logger.info(odsTransferRequest.getDestination().getParentInfo().toString());
         logger.info(odsTransferRequest.getSource().getParentInfo().toString());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
