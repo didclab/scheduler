@@ -1,8 +1,12 @@
 package com.rabbitMq.rabbitmqscheduler.DTO;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserTransferOptions {
     private Boolean compress;
     private Boolean encrypt;
