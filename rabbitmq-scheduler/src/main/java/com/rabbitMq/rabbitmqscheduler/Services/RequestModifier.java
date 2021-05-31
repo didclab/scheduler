@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 @Service
@@ -48,7 +49,9 @@ public class RequestModifier {
             case sftp:
                 logger.info("Expanding SFTP");
                 sftpExpander.createClient(source.getVfsSourceCredential());
-                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                List<EntityInfo> files =sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                logger.info(files.toString());
+                return files;
             case box:
                 return null;
             case gftp:
