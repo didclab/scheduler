@@ -2,7 +2,9 @@ package com.rabbitMq.rabbitmqscheduler.Services;
 
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
@@ -78,20 +80,20 @@ public class RequestModifier {
         EndpointCredential destinationCredential;
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
 //            AccountEndpointCredential sourceCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getAccountId());
+            sourceCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
         } else {
 //            OAuthEndpointCredential sourceCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId(), odsTransferRequest.getSource().getType());
-            sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getAccountId());
+            sourceCredential = (OAuthEndpointCredential) credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(EndpointCredential.getOAuthCredential(sourceCredential));
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
 //            AccountEndpointCredential destCred = getNonOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getAccountId());
+            destinationCredential = (AccountEndpointCredential) credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
         } else {
 //            OAuthEndpointCredential destCred = getOautCred(odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getAccountId(), odsTransferRequest.getDestination().getType());
-            destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getAccountId());
+            destinationCredential = (OAuthEndpointCredential) credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
         }
         List<EntityInfo> expandedFiles = selectAndExpand(s.getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());

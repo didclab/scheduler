@@ -24,7 +24,7 @@ public class RequestFromODS {
     @NoArgsConstructor
     public static class Source {
         @NonNull
-        private String accountId;
+        private String credId;
         @NonNull
         private EndPointType type;
         @NonNull
@@ -38,7 +38,7 @@ public class RequestFromODS {
     @NoArgsConstructor
     public static class Destination {
         @NonNull
-        private String accountId;
+        private String credId;
         @NonNull
         private EndPointType type;
         @NonNull
