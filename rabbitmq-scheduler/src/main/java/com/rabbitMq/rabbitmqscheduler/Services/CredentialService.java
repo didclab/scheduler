@@ -27,8 +27,8 @@ public class CredentialService {
         credListUrl = credentialEureka+"/{userId}/{type}/{accountId}";
     }
 
-    public AccountEndpointCredential fetchAccountCredential(EndPointType type, String userId, String credId){
-        logger.info(type.toString() + ":"+userId+":"+credId);
+    public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId){
+        logger.info(type + ":"+userId+":"+credId);
         return restTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
     }
 
