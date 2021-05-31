@@ -73,20 +73,20 @@ public class RequestModifier {
         EndpointCredential sourceCredential;
         EndpointCredential destinationCredential;
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
             logger.info(sourceCredential.toString());
         } else {
-            sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(EndpointCredential.getOAuthCredential(sourceCredential));
             logger.info(sourceCredential.toString());
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
             logger.info(destinationCredential.toString());
         } else {
-            destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getAccountId());
+            destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
             logger.info(destinationCredential.toString());
         }
