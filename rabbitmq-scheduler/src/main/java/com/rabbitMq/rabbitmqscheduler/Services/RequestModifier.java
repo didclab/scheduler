@@ -97,7 +97,6 @@ public class RequestModifier {
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
         transferJobRequest.setChunkSize(correctChunkSize(transferJobRequest.getDestination().getType(), 6400000));//this is default and needs to come from the optimizer
-        logger.info("Processed Job with ID: " + transferJobRequest.getJobId());
         return transferJobRequest;
     }
 

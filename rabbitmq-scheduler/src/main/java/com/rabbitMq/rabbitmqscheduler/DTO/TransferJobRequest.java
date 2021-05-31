@@ -26,13 +26,6 @@ public class TransferJobRequest {
     private Destination destination;
     private TransferOptions options;
 
-    public TransferJobRequest(String jobId, String ownerId, int priority, int chunkSize) {
-        this.jobId = jobId;
-        this.ownerId = ownerId;
-        this.priority = priority;
-        this.chunkSize = chunkSize;
-    }
-
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
