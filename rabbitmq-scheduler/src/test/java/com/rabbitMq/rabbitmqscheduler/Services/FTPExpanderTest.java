@@ -15,7 +15,7 @@ public class FTPExpanderTest extends TestCase {
     public AccountEndpointCredential testFTPCredential(){
         AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
         accountEndpointCredential.setAccountId("testuser@helloworld.com");
-        accountEndpointCredential.setAccountId("anonymous");
+        accountEndpointCredential.setUsername("anonymous");
         accountEndpointCredential.setSecret("anonymous");
         accountEndpointCredential.setUri("ftp://speedtest.tele2.net");
         return accountEndpointCredential;
@@ -25,7 +25,10 @@ public class FTPExpanderTest extends TestCase {
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
         List<EntityInfo> fullFiles = testObj.expandedFileSystem(new ArrayList<>(),"/");
-        Assert.isTrue(fullFiles.size() > 0, "the amount of files on speed test tele2net");
+        for(EntityInfo file: fullFiles){
+            System.out.println(file.toString());
+        }
+        Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 
     public void testListingOnlyUploadDirectory(){

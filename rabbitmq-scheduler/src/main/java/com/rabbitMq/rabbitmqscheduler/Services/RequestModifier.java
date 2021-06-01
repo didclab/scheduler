@@ -1,7 +1,10 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
+import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
+import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
@@ -10,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 @Service
@@ -28,17 +32,17 @@ public class RequestModifier {
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 
-    public List<EntityInfo> selectAndExpand(EndPointType type, EndpointCredential credential, List<EntityInfo> selectedResources, String basePath){
-        switch (type){
+    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
+        switch (source.getType()){
             case ftp:
-                ftpExpander.createClient(credential);
-                return ftpExpander.expandedFileSystem(selectedResources, basePath);
+                ftpExpander.createClient(source.getVfsSourceCredential());
+                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
-                s3Expander.createClient(credential);
-                return s3Expander.expandedFileSystem(selectedResources, basePath);
+                s3Expander.createClient(source.getVfsSourceCredential());
+                return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
-                sftpExpander.createClient(credential);
-                return sftpExpander.expandedFileSystem(selectedResources, basePath);
+                sftpExpander.createClient(source.getVfsSourceCredential());
+                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
                 return null;
             case gftp:
@@ -58,11 +62,10 @@ public class RequestModifier {
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
         logger.info("hit createRequest ");
         TransferJobRequest transferJobRequest = new TransferJobRequest();
-        transferJobRequest.setJobId(odsTransferRequest.getId());
-        transferJobRequest.setChunkSize(odsTransferRequest.getChunkSize());
-        transferJobRequest.setOptions(odsTransferRequest.getOptions());
-        transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
-        transferJobRequest.setPriority(1);
+        transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
+        transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
+        transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
+        transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
@@ -70,80 +73,42 @@ public class RequestModifier {
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
-        EndpointCredential sourceCredential;
-        EndpointCredential destinationCredential;
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
-            s.setVfsSourceCredential(EndpointCredential.getAccountCredential(sourceCredential));
-            logger.info(sourceCredential.toString());
+
+            AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            s.setVfsSourceCredential(sourceCredential);
         } else {
-            sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
-            s.setOauthSourceCredential(EndpointCredential.getOAuthCredential(sourceCredential));
-            logger.info(sourceCredential.toString());
+            OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            s.setOauthSourceCredential(sourceCredential);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
-            d.setVfsDestCredential(EndpointCredential.getAccountCredential(destinationCredential));
-            logger.info(destinationCredential.toString());
+            AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
+            d.setVfsDestCredential(destinationCredential);
         } else {
-            destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
-            d.setOauthDestCredential(EndpointCredential.getOAuthCredential(destinationCredential));
-            logger.info(destinationCredential.toString());
+            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            d.setOauthDestCredential(destinationCredential);
         }
-        List<EntityInfo> expandedFiles = selectAndExpand(s.getType(), sourceCredential, odsTransferRequest.getSource().getInfoList(),odsTransferRequest.getSource().getParentInfo().getPath());
+        List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
+        transferJobRequest.setChunkSize(correctChunkSize(transferJobRequest.getDestination().getType(), 6400000));//this is default and needs to come from the optimizer
         return transferJobRequest;
     }
 
-//    private OAuthEndpointCredential getOautCred(String userId, String accountId, EndPointType type) {
-//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-//        OAuthEndpointCredential oAuthEndpointCredential = null;
-//        String jsonString = getResponseFromCred(urlToRead);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            oAuthEndpointCredential = objectMapper.readValue(jsonString, OAuthEndpointCredential.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        return oAuthEndpointCredential;
-//    }
-//
-//    private AccountEndpointCredential getNonOautCred(String userId, String accountId, EndPointType type) {
-//        String urlToRead = credBaseUri + userId + "/" + type + "/" + accountId;
-//        AccountEndpointCredential accountEndpointCredential = null;
-//        String jsongString = getResponseFromCred(urlToRead);
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            accountEndpointCredential = objectMapper.readValue(jsongString, AccountEndpointCredential.class);
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//        return accountEndpointCredential;
-//    }
-//
-//    private String getResponseFromCred(String urlToRead) {
-//        logger.info("Hitting cred service with url : " + urlToRead);
-//        StringBuilder line = new StringBuilder();
-//        try {
-//            URL url = new URL(urlToRead);
-//            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-//            conn.setRequestMethod("GET");
-//            conn.connect();
-//            if (conn.getResponseCode() != 200) {
-//                logger.error("Not able to retrive nonOauth cred");
-//                throw new RuntimeException("HttpResponseCode : " + conn.getResponseCode());
-//            } else {
-//                Scanner sc = new Scanner(url.openStream());
-//                while (sc.hasNext()) {
-//                    line.append(sc.nextLine());
-//                }
-//                sc.close();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return line.toString();
-//    }
+    /**
+     * Current little hack to make sure writing to S3 results in a chunkSize greater than 5MB if a multipart request.
+     * This should be a property that is data mined in the optimization service
+     * @param destType
+     * @param chunkSize
+     * @return
+     */
+    public int correctChunkSize(EndPointType destType, int chunkSize){
+        if(destType.equals(EndPointType.s3) && chunkSize < 5000000){ //5MB as we work with bytes not bits!
+            return 10000000;
+        }else{
+            return chunkSize;
+        }
+
+    }
 }
