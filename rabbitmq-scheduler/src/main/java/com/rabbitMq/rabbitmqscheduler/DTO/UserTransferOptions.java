@@ -14,4 +14,9 @@ public class UserTransferOptions {
     private boolean overwrite;
     private Integer retry;
     private Boolean verify;
+    private Integer concurrencyThreadCount;
+    private Integer parallelThreadCount;
+    private Integer pipeSize;
+    private Integer chunkSize;
+
 }

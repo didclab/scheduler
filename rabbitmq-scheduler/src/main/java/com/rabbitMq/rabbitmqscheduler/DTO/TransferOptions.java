@@ -22,15 +22,15 @@ public class TransferOptions {
 
     public static TransferOptions createTransferOptionsFromUser(UserTransferOptions userTransferOptions) {
         return TransferOptions.builder()
-                .compress(userTransferOptions.getCompress() == null? false: true)
-                .concurrencyThreadCount(1)
-                .pipeSize(1)
-                .parallelThreadCount(0)
-                .optimizer(userTransferOptions.getOptimizer())
-                .encrypt(userTransferOptions.getEncrypt())
+                .compress(userTransferOptions.getCompress() != null && userTransferOptions.getCompress())
+                .concurrencyThreadCount(userTransferOptions.getConcurrencyThreadCount() < 1? 1: userTransferOptions.getConcurrencyThreadCount())
+                .pipeSize(userTransferOptions.getPipeSize() < 1?1: userTransferOptions.getPipeSize())
+                .parallelThreadCount(userTransferOptions.getParallelThreadCount() < 1? 1 : userTransferOptions.getParallelThreadCount() )
+                .optimizer(userTransferOptions.getOptimizer() == null ? "" : userTransferOptions.getOptimizer())
+                .encrypt(userTransferOptions.getEncrypt() != null && userTransferOptions.getEncrypt())
                 .overwrite(userTransferOptions.isOverwrite())
-                .retry(userTransferOptions.getRetry())
-                .verify(userTransferOptions.getVerify())
+                .retry(userTransferOptions.getRetry() == null ? 1: userTransferOptions.getRetry())
+                .verify(userTransferOptions.getVerify() != null && userTransferOptions.getVerify())
                 .build();
     }
 
