@@ -2,7 +2,6 @@ package com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS;
 
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
-import com.rabbitMq.rabbitmqscheduler.DTO.UserTransferOptions;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import lombok.*;
 
@@ -12,17 +11,21 @@ import java.util.ArrayList;
 @Setter
 public class RequestFromODS {
 
-    private String ownerId;
+    private String id;
+    @NonNull
+    private String userId;
+    private long chunkSize;
     @NonNull
     private Source source;
     @NonNull
     private Destination destination;
-    private UserTransferOptions options;
+    private TransferOptions options;
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Source {
+
         @NonNull
         private String credId;
         @NonNull
@@ -44,5 +47,4 @@ public class RequestFromODS {
         @NonNull
         private EntityInfo parentInfo;
     }
-
 }

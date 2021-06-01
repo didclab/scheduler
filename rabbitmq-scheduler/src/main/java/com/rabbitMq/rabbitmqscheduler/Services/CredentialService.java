@@ -16,7 +16,7 @@ import javax.annotation.PostConstruct;
 @Component
 public class CredentialService {
     private String credListUrl;
-    private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
+    public Logger logger = LoggerFactory.getLogger(CredentialService.class);
     @Value("${cred.service.eureka.uri}")
     String credentialEureka;
 
@@ -29,9 +29,9 @@ public class CredentialService {
         credListUrl = credentialEureka+"/{userId}/{type}/{credId}";
     }
 
-    public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId){
-        logger.info(type + ":"+userId+":"+credId);
-        return restTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
+    public AccountEndpointCredential fetchAccountCredential(EndPointType type, String userId, String credId){
+        logger.info(credListUrl);
+        return eurekaTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type.toString(), credId);
     }
 
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){

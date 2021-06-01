@@ -1,7 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.DTO.credential;
 
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
-import lombok.Data;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,7 +8,6 @@ import java.util.HashSet;
 /**
  * Base class for storing one user credential
  */
-@Data
 public class EndpointCredential {
     protected String accountId;
 

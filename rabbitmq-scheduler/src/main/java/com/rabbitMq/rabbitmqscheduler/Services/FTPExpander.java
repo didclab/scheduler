@@ -47,7 +47,7 @@ public class FTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<FileObject> traversalStack = new Stack<>();
         FileSystemManager fsm = VFS.getManager();
-        if(basePath.isEmpty() || basePath == null) basePath = "/";
+        if(basePath.isEmpty()) basePath = "/";
         if(infoList.isEmpty()){
             FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, generateOpts());
             traversalStack.push(obj);
