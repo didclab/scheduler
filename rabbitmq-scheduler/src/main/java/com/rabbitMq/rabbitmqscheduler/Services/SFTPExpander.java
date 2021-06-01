@@ -16,7 +16,6 @@ public class SFTPExpander implements FileExpander {
     ChannelSftp channelSftp;
     List<EntityInfo> infoList;
 
-    @SneakyThrows
     @Override
     public void createClient(EndpointCredential cred) {
         this.credential = EndpointCredential.getAccountCredential(cred);
@@ -50,6 +49,7 @@ public class SFTPExpander implements FileExpander {
         ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
         channelSftp.connect();
         this.channelSftp = channelSftp;
+
     }
 
     @SneakyThrows
