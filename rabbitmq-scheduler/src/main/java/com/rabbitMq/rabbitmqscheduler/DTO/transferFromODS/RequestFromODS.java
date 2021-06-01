@@ -12,7 +12,7 @@ import java.util.ArrayList;
 @Setter
 public class RequestFromODS {
 
-    private String ownerId;
+    private String userId;
     @NonNull
     private Source source;
     @NonNull
