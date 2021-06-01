@@ -59,7 +59,7 @@ public class SFTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<ChannelSftp.LsEntry> traversalStack = new Stack<>();
         HashMap<ChannelSftp.LsEntry, String> entryToFullPath = new HashMap<>();
-        if (basePath.isEmpty()) {
+        if (basePath.isEmpty() || basePath == null) {
             basePath = channelSftp.pwd() + "/";
         }
         if (userSelectedResources.isEmpty()) {

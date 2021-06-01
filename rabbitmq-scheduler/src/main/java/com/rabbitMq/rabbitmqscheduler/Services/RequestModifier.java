@@ -46,7 +46,7 @@ public class RequestModifier {
                 return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
                 sftpExpander.createClient(source.getVfsSourceCredential());
-                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
                 return null;
             case gftp:
