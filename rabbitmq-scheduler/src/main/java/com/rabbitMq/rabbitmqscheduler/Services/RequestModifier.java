@@ -40,18 +40,13 @@ public class RequestModifier {
         switch (source.getType()){
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
-                logger.info("Expanding FTP");
                 return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
-                logger.info("Expanding S3");
                 s3Expander.createClient(source.getVfsSourceCredential());
                 return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
-                logger.info("Expanding SFTP");
                 sftpExpander.createClient(source.getVfsSourceCredential());
-                List<EntityInfo> files =sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
-                logger.info(files.toString());
-                return files;
+                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
                 return null;
             case gftp:
