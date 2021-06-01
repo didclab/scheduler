@@ -23,9 +23,6 @@ public class RequestModifier {
     @Autowired
     CredentialService credentialService;
 
-//    @Value("${cred.service.uri}")
-//    String credBaseUri;
-
     @Autowired
     SFTPExpander sftpExpander;
     @Autowired
@@ -34,7 +31,6 @@ public class RequestModifier {
     S3Expander s3Expander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
-//    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
         switch (source.getType()){
@@ -64,6 +60,7 @@ public class RequestModifier {
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
+        logger.info("hit createRequest ");
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
@@ -77,6 +74,7 @@ public class RequestModifier {
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
+
             AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(sourceCredential);
         } else {

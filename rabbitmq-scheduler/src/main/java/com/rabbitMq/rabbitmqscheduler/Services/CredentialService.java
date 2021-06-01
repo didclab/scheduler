@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.netflix.discovery.EurekaClient;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
@@ -20,11 +21,12 @@ public class CredentialService {
     String credentialEureka;
 
     @Autowired
-    RestTemplate restTemplate;
+    RestTemplate eurekaTemplate;
+
 
     @PostConstruct
     public void adjustUrl(){
-        credListUrl = credentialEureka+"/{userId}/{type}/{accountId}";
+        credListUrl = credentialEureka+"/{userId}/{type}/{credId}";
     }
 
     public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId){
@@ -33,6 +35,7 @@ public class CredentialService {
     }
 
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
-        return restTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
+        logger.info(credListUrl);
+        return eurekaTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
     }
 }
