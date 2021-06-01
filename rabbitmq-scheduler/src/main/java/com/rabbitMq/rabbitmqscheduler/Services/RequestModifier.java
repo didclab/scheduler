@@ -23,9 +23,6 @@ public class RequestModifier {
     @Autowired
     CredentialService credentialService;
 
-//    @Value("${cred.service.uri}")
-//    String credBaseUri;
-
     @Autowired
     SFTPExpander sftpExpander;
     @Autowired
@@ -67,7 +64,7 @@ public class RequestModifier {
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
-        transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
+        transferJobRequest.setOwnerId(odsTransferRequest.getUserId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setInfoList(odsTransferRequest.getSource().getInfoList());
@@ -77,17 +74,17 @@ public class RequestModifier {
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(sourceCredential);
         } else {
-            OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(sourceCredential);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
+            AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getUserId(), odsTransferRequest.getDestination().getCredId());
             d.setVfsDestCredential(destinationCredential);
         } else {
-            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getUserId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
         List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
