@@ -3,7 +3,6 @@ package com.rabbitMq.rabbitmqscheduler.Services;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
-import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.*;
 
 @Service
@@ -32,6 +30,8 @@ public class RequestModifier {
     FTPExpander ftpExpander;
     @Autowired
     S3Expander s3Expander;
+    @Autowired
+    BoxExpander boxExpander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 //    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
@@ -48,7 +48,8 @@ public class RequestModifier {
                 sftpExpander.createClient(source.getVfsSourceCredential());
                 return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
-                return null;
+                boxExpander.createClient(source.getOauthSourceCredential());
+                return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case gftp:
                 return null;
             case http:
