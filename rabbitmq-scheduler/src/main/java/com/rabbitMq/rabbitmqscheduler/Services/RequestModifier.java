@@ -21,9 +21,6 @@ public class RequestModifier {
     @Autowired
     CredentialService credentialService;
 
-//    @Value("${cred.service.uri}")
-//    String credBaseUri;
-
     @Autowired
     SFTPExpander sftpExpander;
     @Autowired
@@ -32,6 +29,9 @@ public class RequestModifier {
     S3Expander s3Expander;
     @Autowired
     BoxExpander boxExpander;
+
+    @Autowired
+    DropBoxExpander dropBoxExpander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
 //    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
@@ -55,9 +55,14 @@ public class RequestModifier {
             case http:
                 return null;
             case dropbox:
-                return null;
+                dropBoxExpander.createClient(source.getOauthSourceCredential());
+                return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case gdrive:
                 return null;
+            /**
+             * need to figure out how to handle the case of connectors deployed
+             * This will be very experiemental but will probably not expand those requests.
+             */
             case vfs:
                 return null;
         }
