@@ -7,7 +7,7 @@ stages:
 variables:
   APP_PORT: 8092
   DOCKER_DRIVER: overlay
-  APP_NAME: Transfer Service
+  APP_NAME: Transfer Scheduler
   IMAGE_TAG: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 ##Build the project
