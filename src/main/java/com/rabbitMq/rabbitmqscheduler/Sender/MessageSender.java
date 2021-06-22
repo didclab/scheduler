@@ -24,6 +24,6 @@ public class MessageSender {
     public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
         rmqTemplate.convertAndSend(exchange, routingkey, odsTransferRequest);
         logger.info("Processed Job with ID: " + odsTransferRequest.getJobId());
-
     }
+
 }
