@@ -15,7 +15,6 @@ maven-build:
   image: maven:3-jdk-11
   stage: build
   script:
-    - "cd rabbitmq-scheduler"
     - "mvn clean package -DskipTests"
   artifacts:
     paths:
