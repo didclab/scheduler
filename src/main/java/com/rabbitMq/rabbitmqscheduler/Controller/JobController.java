@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class JobController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobController.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobController.class);
 
     @Autowired
     MessageSender messageSender;
@@ -26,6 +26,7 @@ public class JobController {
     @RequestMapping(value = "/receiveRequest", method = RequestMethod.POST)
     public String receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
+        logger.info("Created message with owner " + transferJobRequest.getJobId() +" and the job id is " + transferJobRequest.getJobId());
         messageSender.sendTransferRequest(transferJobRequest);
         return "Message pushed to queue";
     }
