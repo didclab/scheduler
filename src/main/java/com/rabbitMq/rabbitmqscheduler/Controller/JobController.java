@@ -8,10 +8,9 @@ import com.rabbitMq.rabbitmqscheduler.Services.RequestModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class JobController {
@@ -24,10 +23,11 @@ public class JobController {
     RequestModifier requestModifier;
 
     @RequestMapping(value = "/receiveRequest", method = RequestMethod.POST)
-    public String receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
+    public ResponseEntity<String> receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
+        logger.info("Created message with owner " + odsTransferRequest.getOwnerId() +" and the job id is "
+                + odsTransferRequest.getOptions().toString());
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
-        logger.info("Created message with owner " + transferJobRequest.getJobId() +" and the job id is " + transferJobRequest.getJobId());
         messageSender.sendTransferRequest(transferJobRequest);
-        return "Message pushed to queue";
+        return new ResponseEntity<>("Pushed job to queue with id " + transferJobRequest.getJobId(), HttpStatus.OK);
     }
 }
