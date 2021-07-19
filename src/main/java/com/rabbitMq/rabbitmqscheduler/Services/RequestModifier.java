@@ -7,8 +7,6 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +14,6 @@ import java.util.*;
 
 @Service
 public class RequestModifier {
-    private static final Logger logger = LoggerFactory.getLogger(RequestModifier.class);
 
     @Autowired
     CredentialService credentialService;
@@ -29,12 +26,11 @@ public class RequestModifier {
     S3Expander s3Expander;
     @Autowired
     BoxExpander boxExpander;
-
     @Autowired
     DropBoxExpander dropBoxExpander;
 
-    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "vfs", "s3"}));
-//    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
+    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
+    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
         switch (source.getType()){
@@ -64,7 +60,7 @@ public class RequestModifier {
              * This will be very experiemental but will probably not expand those requests.
              */
             case vfs:
-                return null;
+                return new ArrayList<EntityInfo>();
         }
         return null;
     }
@@ -83,16 +79,16 @@ public class RequestModifier {
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
         d.setType(odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
-            AccountEndpointCredential sourceCredential =credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            AccountEndpointCredential sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(sourceCredential);
-        } else {
+        } else if(oautUsingType.contains(odsTransferRequest.getSource().getType().toString())){
             OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(sourceCredential);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
             AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setVfsDestCredential(destinationCredential);
-        } else {
+        } else if(oautUsingType.contains(odsTransferRequest.getDestination().getType().toString())){
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
@@ -117,6 +113,5 @@ public class RequestModifier {
         }else{
             return chunkSize;
         }
-
     }
 }
