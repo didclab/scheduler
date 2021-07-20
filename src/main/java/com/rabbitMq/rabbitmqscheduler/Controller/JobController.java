@@ -21,7 +21,7 @@ public class JobController {
     @Autowired
     RequestModifier requestModifier;
 
-    @PostMapping(value = "/recieveRequest", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/recieveRequest")
     public TransferJobResponse receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
         logger.info("Created message with owner " + odsTransferRequest.getOwnerId() +" and the job id is "
                 + odsTransferRequest.getOptions().toString());
