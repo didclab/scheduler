@@ -60,7 +60,7 @@ public class RequestModifier {
              * This will be very experiemental but will probably not expand those requests.
              */
             case vfs:
-                return new ArrayList<EntityInfo>();
+                return selectedResources;
         }
         return null;
     }
