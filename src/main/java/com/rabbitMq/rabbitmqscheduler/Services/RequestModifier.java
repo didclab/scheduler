@@ -37,7 +37,7 @@ public class RequestModifier {
     Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
-        logger.info(selectedResources.toString());
+        logger.info("The info list in select and expand is \n" + selectedResources.toString());
         switch (source.getType()){
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
@@ -71,7 +71,6 @@ public class RequestModifier {
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
-        logger.info(odsTransferRequest.toString());
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));

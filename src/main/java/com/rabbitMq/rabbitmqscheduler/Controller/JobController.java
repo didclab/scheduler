@@ -23,8 +23,7 @@ public class JobController {
 
     @PostMapping(value = "/receiveRequest")
     public TransferJobResponse receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
-        logger.info("Created message with owner " + odsTransferRequest.getOwnerId() +" and the job id is "
-                + odsTransferRequest.getOptions().toString());
+        logger.info("Recieved message with id " + odsTransferRequest.getOwnerId());
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
         messageSender.sendTransferRequest(transferJobRequest);
         TransferJobResponse response = new TransferJobResponse();
