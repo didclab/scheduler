@@ -25,27 +25,10 @@ public class RabbitMQConfig {
     @Value("${ods.rabbitmq.routingkey}")
     private String routingkey;
 
-    @Value("${spring.rabbitmq.addresses}")
-    String address;
-
-    @Value("${spring.rabbitmq.password}")
-    String password;
-
-    @Value("${spring.rabbitmq.username}")
-    String username;
 
     @Bean
-    public AmqpAdmin amqpAdmin() {
-        return new RabbitAdmin(connectionFactory());
-    }
-
-    @Bean
-    public ConnectionFactory connectionFactory() {
-        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setAddresses(address);
-        connectionFactory.setUsername(username);
-        connectionFactory.setPassword(password);
-        return connectionFactory;
+    public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
     }
 
 
