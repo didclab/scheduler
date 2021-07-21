@@ -31,6 +31,7 @@ public class MessageSender {
 
     public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
         //all connector requests specify a different routing key which should be the email of that users queue.
+        logger.info(odsTransferRequest.toString());
         if(odsTransferRequest.getSource().getType().equals(EndPointType.vfs) || odsTransferRequest.getDestination().getType().equals(EndPointType.vfs)){
             //for any connector transfer where the user has their own queue.
             String userNotEmail = odsTransferRequest.getOwnerId().split("@")[0];
