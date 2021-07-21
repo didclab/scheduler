@@ -4,10 +4,7 @@ import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,6 +19,9 @@ public class MessageSender {
 
     @Autowired
     DirectExchange directExchange;
+
+    @Autowired
+    AmqpAdmin amqpAdmin;
 
     @Value("${ods.rabbitmq.exchange}")
     private String exchange;
@@ -38,10 +38,7 @@ public class MessageSender {
             String rKey = userNotEmail + "-Binding";
             String queueName = userNotEmail+ "-Queue";
             establishConnectorQueue(queueName, rKey);
-            logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is %s", userNotEmail, rKey, queueName);
-            logger.info(userNotEmail);
-            logger.info(rKey);
-            logger.info(queueName);
+            logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
             rmqTemplate.convertAndSend(exchange, rKey, odsTransferRequest);
         }else{
             //for all aws tranfsers
@@ -51,13 +48,16 @@ public class MessageSender {
     }
 
     public Queue createConnectorQueue(String queueName){
-        return new Queue(queueName, true);
+        Queue queue = new Queue(queueName, true);
+        amqpAdmin.declareQueue(queue);
+        return queue;
     }
 
     public void establishConnectorQueue(String queueName, String rKey){
-        BindingBuilder.bind(createConnectorQueue(queueName))
+        Binding binding = BindingBuilder.bind(createConnectorQueue(queueName))
                 .to(directExchange)
                 .with(rKey);
+        amqpAdmin.declareBinding(binding);
     }
 
 }

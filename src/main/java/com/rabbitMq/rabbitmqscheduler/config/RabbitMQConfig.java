@@ -1,11 +1,9 @@
 package com.rabbitMq.rabbitmqscheduler.config;
 
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -26,6 +24,30 @@ public class RabbitMQConfig {
 
     @Value("${ods.rabbitmq.routingkey}")
     private String routingkey;
+
+    @Value("${spring.rabbitmq.addresses}")
+    String address;
+
+    @Value("${spring.rabbitmq.password}")
+    String password;
+
+    @Value("${spring.rabbitmq.username}")
+    String username;
+
+    @Bean
+    public AmqpAdmin amqpAdmin() {
+        return new RabbitAdmin(connectionFactory());
+    }
+
+    @Bean
+    public ConnectionFactory connectionFactory() {
+        CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
+        connectionFactory.setAddresses(address);
+        connectionFactory.setUsername(username);
+        connectionFactory.setPassword(password);
+        return connectionFactory;
+    }
+
 
     @Bean
     Queue queue() {
@@ -52,7 +74,6 @@ public class RabbitMQConfig {
     RestTemplate restTemplate() {
         return new RestTemplate();
     }
-
 
 //    @Bean
 //    public AmqpTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
