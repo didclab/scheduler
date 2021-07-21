@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.rabbitMq.rabbitmqscheduler.Controller.JobController;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
@@ -7,6 +8,8 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,7 @@ public class RequestModifier {
     @Autowired
     CredentialService credentialService;
 
+    static final Logger logger = LoggerFactory.getLogger(RequestModifier.class);
     @Autowired
     SFTPExpander sftpExpander;
     @Autowired
@@ -33,6 +37,7 @@ public class RequestModifier {
     Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
+        logger.info(selectedResources.toString());
         switch (source.getType()){
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
@@ -66,6 +71,7 @@ public class RequestModifier {
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
+        logger.info(odsTransferRequest.toString());
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
