@@ -36,8 +36,12 @@ public class MessageSender {
             //for any connector transfer where the user has their own queue.
             String userNotEmail = odsTransferRequest.getOwnerId().split("@")[0];
             String rKey = userNotEmail + "-Binding";
-            String queueName = userNotEmail+"-Queue";
+            String queueName = userNotEmail+ "-Queue";
             establishConnectorQueue(queueName, rKey);
+            logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is %s", userNotEmail, rKey, queueName);
+            logger.info(userNotEmail);
+            logger.info(rKey);
+            logger.info(queueName);
             rmqTemplate.convertAndSend(exchange, rKey, odsTransferRequest);
         }else{
             //for all aws tranfsers
