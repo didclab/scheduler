@@ -101,7 +101,7 @@ public class RequestModifier {
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
-        transferJobRequest.setChunkSize(correctChunkSize(transferJobRequest.getDestination().getType(), 6400000));//this is default and needs to come from the optimizer
+        transferJobRequest.setChunkSize(correctChunkSize(transferJobRequest.getDestination().getType(), odsTransferRequest.getOptions().getChunkSize()));//this is default and needs to come from the optimizer
         return transferJobRequest;
     }
 
