@@ -20,7 +20,7 @@ public class SFTPExpanderTest extends TestCase {
     SFTPExpander testObj;
 
     public String readInPemFile() throws IOException {
-        String path = "/Users/jacobgoldverg/testKeys/SFTP-US-West.pem";// this is something that will need to change to a path that is locally available
+        String path = "/Users/jacobgoldverg/.ssh/endpoint-cred-dev.pem";// this is something that will need to change to a path that is locally available
         File file = new File(path);
         String key = new String(Files.readAllBytes(file.toPath()), Charset.defaultCharset());
         String publicKeyPEM = key;
@@ -45,6 +45,7 @@ public class SFTPExpanderTest extends TestCase {
     public void testCreateClientIsNotNull(){
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
+        Assert.isTrue(testObj.channelSftp.isConnected(), "The channel is not connected to the credentials given");
         Assert.isTrue(testObj.channelSftp != null);
     }
 
@@ -54,7 +55,7 @@ public class SFTPExpanderTest extends TestCase {
         try{
             Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls(".");
             Assert.notNull(files);
-            Assert.isTrue(files.size() > 0);
+            Assert.isTrue(files.size() > 0, "the list of files is not greater than 0");
         }catch (SftpException sftpException){
             sftpException.printStackTrace();
         }

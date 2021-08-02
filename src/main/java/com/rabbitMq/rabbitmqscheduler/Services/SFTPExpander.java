@@ -21,11 +21,13 @@ public class SFTPExpander implements FileExpander {
     public void createClient(EndpointCredential cred) {
         this.credential = EndpointCredential.getAccountCredential(cred);
         Session jschSession = null;
-        JSch jsch = new JSch();
-        String[] destCredUri = credential.getUri().split(":");
         boolean connected = false;
-        String portNum = destCredUri[destCredUri.length-1];
-        String host = destCredUri[destCredUri.length-2];
+        JSch jsch = new JSch();
+        String[] typeAndUri = credential.getUri().split("://");
+        String type = typeAndUri[0];
+        String[] hostAndPort = typeAndUri[1].split(":");
+        String portNum = hostAndPort[1];
+        String host = hostAndPort[0];
         try {
             jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
             jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(portNum));
@@ -37,7 +39,7 @@ public class SFTPExpander implements FileExpander {
         }
         if (!connected) {
             try {
-                jschSession = jsch.getSession(credential.getUsername(), destCredUri[0], Integer.parseInt(destCredUri[1]));
+                jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(portNum));
                 jschSession.setConfig("StrictHostKeyChecking", "no");
                 jschSession.setPassword(credential.getSecret());
                 jschSession.connect();
