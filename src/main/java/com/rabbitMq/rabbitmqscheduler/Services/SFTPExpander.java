@@ -59,6 +59,7 @@ public class SFTPExpander implements FileExpander {
     @SneakyThrows
     @Override
     public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+        if(!basePath.endsWith("/")) basePath +="/";
         this.infoList = userSelectedResources;
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<ChannelSftp.LsEntry> traversalStack = new Stack<>();
