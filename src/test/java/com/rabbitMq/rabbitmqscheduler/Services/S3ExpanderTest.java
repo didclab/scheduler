@@ -36,33 +36,18 @@ public class S3ExpanderTest extends TestCase {
         testObj.createClient(createTestCredentials());
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
         Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
+        for(int i = 0; i < expandedBucketFiles.size(); i++){
+            System.out.println(expandedBucketFiles.get(i).toString());
+        }
     }
 
-    public void testExpandUsersPrefix(){
+    public void testExpandWholeBucketWithSlash() {
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
-        ArrayList<EntityInfo> selectedRes = new ArrayList<>();
-        EntityInfo another = new EntityInfo();
-        another.setPath("Users/");
-        another.setId("Users/");
-        selectedRes.add(another);
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(selectedRes, "");
-        Assert.isTrue(expandedBucketFiles.size() == 2 , "The size of Users is 2 which it was not given out");
-    }
-
-    public void testExpandUsersAndTemp(){
-        testObj = new S3Expander();
-        testObj.createClient(createTestCredentials());
-        ArrayList<EntityInfo> twoInfosToMove = new ArrayList<>();
-        EntityInfo info = new EntityInfo();
-        info.setId("temp/");
-        info.setPath("temp/");
-        EntityInfo another = new EntityInfo();
-        another.setPath("Users/");
-        another.setId("Users/");
-        twoInfosToMove.add(info);
-        twoInfosToMove.add(another);
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(twoInfosToMove, "");
-        Assert.isTrue(expandedBucketFiles.size() == 8, "the total files was not 8");
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "/");
+        Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
+        for(int i = 0; i < expandedBucketFiles.size(); i++){
+            System.out.println(expandedBucketFiles.get(i).toString());
+        }
     }
 }

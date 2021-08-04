@@ -82,7 +82,7 @@ public class SFTPExpanderTest extends TestCase {
         ArrayList<EntityInfo> list = new ArrayList<>();
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setId("");
-        entityInfo.setPath("test/");
+        entityInfo.setPath("endpoint-cred-service/");
         list.add(entityInfo);
         return list;
     }
@@ -101,10 +101,12 @@ public class SFTPExpanderTest extends TestCase {
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
         try{
-            Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls("/home/ubuntu/pipeDataSet");
-            List<EntityInfo> expandedList = testObj.expandedFileSystem(listPipeDataSet(), "/home/ubuntu/");
-            int totalInFiles = files.size() -2;//the reason for this is we will get back "." and "..";
-            Assert.isTrue(expandedList.size() == totalInFiles, "The number of listed files is greater or less than the files in pipeDataSet on SFTP US West");
+            Vector<ChannelSftp.LsEntry> files = testObj.channelSftp.ls(".");
+            List<EntityInfo> expandedList = testObj.expandedFileSystem(listTestDir(), "/home/ubuntu");
+            for(EntityInfo fileInfo: expandedList){
+                System.out.println(fileInfo.toString());
+                Assert.isTrue(fileInfo.getPath().length() >= fileInfo.getId().length(), "The file path is shorter than the file id");
+            }
         }catch (SftpException sftpException){
             sftpException.printStackTrace();
         }
@@ -113,7 +115,7 @@ public class SFTPExpanderTest extends TestCase {
     public void testExpandedFileSystemWithNestedDirectories() {
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(listFtest(), "/home/ubuntu/");
+        List<EntityInfo> expandedList = testObj.expandedFileSystem(listFtest(), "/home/ubuntu");
         Assert.isTrue(expandedList.size() == 125, "The size should be 125 ");
         for(EntityInfo info: expandedList){
             if(info.getId().equals(".") || info.getId().equals("..")){

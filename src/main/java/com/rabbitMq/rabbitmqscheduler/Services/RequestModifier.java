@@ -1,6 +1,5 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
-import com.rabbitMq.rabbitmqscheduler.Controller.JobController;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;

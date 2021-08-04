@@ -37,7 +37,7 @@ public class S3Expander implements FileExpander{
         List<EntityInfo> traversedFiles = new LinkedList<>();
         if(userSelectedResources.isEmpty()){//expand the whole bucket relative to the basePath
             ListObjectsV2Result result = this.s3Client.listObjectsV2(createSkeletonPerResource(basePath));
-             traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
+            traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
         }else{
             for(EntityInfo userSelectedResource: userSelectedResources){
                 String path = basePath+userSelectedResource.getPath();
