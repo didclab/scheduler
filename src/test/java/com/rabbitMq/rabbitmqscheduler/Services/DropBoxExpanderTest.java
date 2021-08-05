@@ -13,7 +13,7 @@ public class DropBoxExpanderTest extends TestCase {
     DropBoxExpander testObj;
 
     public OAuthEndpointCredential devToken(){
-        OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential("developerToken");
+        OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
         oAuthEndpointCredential.setToken("");
         return oAuthEndpointCredential;
     }

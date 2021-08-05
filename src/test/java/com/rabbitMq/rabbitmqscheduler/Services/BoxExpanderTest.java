@@ -14,7 +14,7 @@ public class BoxExpanderTest extends TestCase {
     BoxExpander testObj;
 
     public OAuthEndpointCredential oAuthEndpointCredentialWithDevToken(){
-        OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential("testuserId");
+        OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
         oAuthEndpointCredential.setToken("lb0xaHpyPb9RTYpyKYumxLc1RUoXPtgd");//this is temporary dev token
         return oAuthEndpointCredential;
     }
