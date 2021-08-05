@@ -59,7 +59,7 @@ public class SFTPExpander implements FileExpander {
     @SneakyThrows
     @Override
     public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
-        if(!basePath.endsWith("/")) basePath +="/";
+        //if(!basePath.endsWith("/")) basePath +="/";
         this.infoList = userSelectedResources;
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<ChannelSftp.LsEntry> traversalStack = new Stack<>();
@@ -77,12 +77,19 @@ public class SFTPExpander implements FileExpander {
             for (EntityInfo e : userSelectedResources) {
                 String path = basePath + e.getPath();
                 Vector<ChannelSftp.LsEntry> fileVector = channelSftp.ls(path);
-                for (ChannelSftp.LsEntry curr : fileVector) {
-                    entryToFullPath.put(curr, path + curr.getFilename());
-                    traversalStack.add(curr);
+                if(fileVector.size() == 1) {
+                    ChannelSftp.LsEntry curr = fileVector.get(0);
+                    entryToFullPath.put(curr, path);
+                    traversalStack.add(fileVector.get(0));
+                }else{
+                    for (ChannelSftp.LsEntry curr : fileVector) {
+                        entryToFullPath.put(curr, path + curr.getFilename());
+                        traversalStack.add(curr);
+                    }
                 }
             }
         }
+
         while (!traversalStack.isEmpty()) {
             ChannelSftp.LsEntry curr = traversalStack.pop();
             String fullPath = entryToFullPath.remove(curr);

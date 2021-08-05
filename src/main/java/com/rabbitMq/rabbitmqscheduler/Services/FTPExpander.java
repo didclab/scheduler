@@ -9,6 +9,8 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -18,6 +20,7 @@ public class FTPExpander implements FileExpander {
 
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
+    static final Logger logger = LoggerFactory.getLogger(FTPExpander.class);
 
 
     public static FileSystemOptions generateOpts() {
@@ -71,6 +74,7 @@ public class FTPExpander implements FileExpander {
                 }
             } else if (curr.getType() == FileType.FILE) {
                 String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
+                filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                 EntityInfo fileInfo = new EntityInfo();
                 fileInfo.setId(curr.getName().getBaseName());
                 fileInfo.setPath(filePath);

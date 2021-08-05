@@ -5,6 +5,7 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import junit.framework.TestCase;
 import org.springframework.util.Assert;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,23 @@ public class S3ExpanderTest extends TestCase {
         for(int i = 0; i < expandedBucketFiles.size(); i++){
             System.out.println(expandedBucketFiles.get(i).toString());
         }
+    }
+
+    public void testOneFile(){
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        ArrayList<EntityInfo> list = new ArrayList<>();
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setPath("100KB.zip");
+        fileInfo.setId("100KB.zip");
+        fileInfo.setSize(32);
+        list.add(fileInfo);
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "");
+        Assert.isTrue(expandedBucketFiles.size() == 1, "The size should be one");
+        for(int i = 0; i < expandedBucketFiles.size(); i++){
+            System.out.println(expandedBucketFiles.get(i).toString());
+        }
+
     }
 
     public void testExpandWholeBucketWithSlash() {

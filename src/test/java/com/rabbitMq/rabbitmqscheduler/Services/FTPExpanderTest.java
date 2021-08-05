@@ -24,7 +24,7 @@ public class FTPExpanderTest extends TestCase {
     public void testlistAllFilesFromSpeedTest() {
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
-        List<EntityInfo> fullFiles = testObj.expandedFileSystem(new ArrayList<>(),"");
+        List<EntityInfo> fullFiles = testObj.expandedFileSystem(new ArrayList<>(),"/");
         for(EntityInfo file: fullFiles){
             System.out.println(file.toString());
         }
@@ -48,6 +48,9 @@ public class FTPExpanderTest extends TestCase {
         EntityInfo testInfo = new EntityInfo();
         testInfo.setId("upload/");
         listInfo.add(testInfo);
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("100MB.zip");
+//        fileInfo.setSize();
         return listInfo;
     }
 }
