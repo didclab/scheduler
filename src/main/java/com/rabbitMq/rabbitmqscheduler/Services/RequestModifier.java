@@ -95,7 +95,7 @@ public class RequestModifier {
             AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setVfsDestCredential(destinationCredential);
         } else if(oautUsingType.contains(odsTransferRequest.getDestination().getType().toString())){
-            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
         List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
