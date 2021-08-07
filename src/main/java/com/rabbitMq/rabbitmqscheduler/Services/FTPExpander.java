@@ -57,6 +57,7 @@ public class FTPExpander implements FileExpander {
             traversalStack.push(obj);
         }else{
             for (EntityInfo e : this.infoList) {
+                logger.info(this.vfsCredential.getUri() + basePath + e.getId());
                 FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), generateOpts());
                 traversalStack.push(fObject);
             }
@@ -65,6 +66,7 @@ public class FTPExpander implements FileExpander {
             FileObject curr = traversalStack.pop();
             FileName fileName = curr.getName();
             URI uri = URI.create(fileName.getURI());
+            logger.info(uri.toString());
             if (curr.getType() == FileType.FOLDER) {
                 traversalStack.addAll(Arrays.asList(curr.getChildren()));
                 //Add empty folders as well
