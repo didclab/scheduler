@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.*;
 
 @Service
@@ -62,22 +63,23 @@ public class FTPExpander implements FileExpander {
         }
         for (int files = Integer.MAX_VALUE; files > 0 && !traversalStack.isEmpty(); --files) {
             FileObject curr = traversalStack.pop();
+            FileName fileName = curr.getName();
+            URI uri = URI.create(fileName.getURI());
             if (curr.getType() == FileType.FOLDER) {
                 traversalStack.addAll(Arrays.asList(curr.getChildren()));
                 //Add empty folders as well
                 if (curr.getChildren().length == 0) {
-                    String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                     EntityInfo fileInfo = new EntityInfo();
-                    fileInfo.setId(curr.getName().getBaseName());
-                    fileInfo.setPath(filePath);
+                    fileInfo.setId(fileName.getBaseName());
+                    fileInfo.setPath(uri.getPath());
                     filesToTransferList.add(fileInfo);
                 }
             } else if (curr.getType() == FileType.FILE) {
-                String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
-                filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
+
+                //filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                 EntityInfo fileInfo = new EntityInfo();
                 fileInfo.setId(curr.getName().getBaseName());
-                fileInfo.setPath(filePath);
+                fileInfo.setPath(uri.getPath());
                 fileInfo.setSize(curr.getContent().getSize());
                 filesToTransferList.add(fileInfo);
             }

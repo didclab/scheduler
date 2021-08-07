@@ -5,6 +5,7 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import junit.framework.TestCase;
 import org.springframework.util.Assert;
 
+import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class FTPExpanderTest extends TestCase {
         accountEndpointCredential.setAccountId("testuser@helloworld.com");
         accountEndpointCredential.setUsername("anonymous");
         accountEndpointCredential.setSecret("anonymous");
-        accountEndpointCredential.setUri("ftp://speedtest.tele2.net");
+        accountEndpointCredential.setUri("ftp://speedtest.tele2.net:21");
         return accountEndpointCredential;
     }
 
@@ -31,7 +32,7 @@ public class FTPExpanderTest extends TestCase {
         Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 
-    public void testListingOnlyUploadDirectory(){
+    public void testListingUploadAndHundreMB(){
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
         createInfoList();
@@ -43,14 +44,25 @@ public class FTPExpanderTest extends TestCase {
         Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 
-    public List<EntityInfo> createInfoList(){
-        ArrayList<EntityInfo> listInfo = new ArrayList<>();
-        EntityInfo testInfo = new EntityInfo();
-        testInfo.setId("upload/");
-        listInfo.add(testInfo);
+    public EntityInfo hundredMBFile(){
         EntityInfo fileInfo = new EntityInfo();
         fileInfo.setId("100MB.zip");
-//        fileInfo.setSize();
+        fileInfo.setSize(104857600);
+        fileInfo.setPath("/100MB.zip");
+        return fileInfo;
+    }
+
+    public EntityInfo uploadDirectory(){
+        EntityInfo testInfo = new EntityInfo();
+        testInfo.setId("upload/");
+        testInfo.setPath("upload/");
+        return testInfo;
+    }
+
+    public List<EntityInfo> createInfoList(){
+        ArrayList<EntityInfo> listInfo = new ArrayList<>();
+        listInfo.add(uploadDirectory());
+        listInfo.add(hundredMBFile());
         return listInfo;
     }
 }
