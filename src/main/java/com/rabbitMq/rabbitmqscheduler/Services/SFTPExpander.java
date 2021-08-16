@@ -23,14 +23,17 @@ public class SFTPExpander implements FileExpander {
         Session jschSession = null;
         boolean connected = false;
         JSch jsch = new JSch();
-        String[] typeAndUri = credential.getUri().split("://");
-        String type = typeAndUri[0];
-        String[] hostAndPort = typeAndUri[1].split(":");
-        String portNum = hostAndPort[1];
-        String host = hostAndPort[0];
+        String[] typeAndUri = credential.getUri().split("://"); //split out the sftp partof the string
+        String host = "";
+        String port = "22";
+        if(typeAndUri[1].contains(":")){
+            String[] hostAndPort = typeAndUri[1].split(":");
+            host = hostAndPort[0];
+            port = hostAndPort[1];
+        }
         try {
             jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
-            jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(portNum));
+            jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(port));
             jschSession.connect();
             jschSession.setConfig("StrictHostKeyChecking", "no");
             connected = true;
@@ -39,7 +42,7 @@ public class SFTPExpander implements FileExpander {
         }
         if (!connected) {
             try {
-                jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(portNum));
+                jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(port));
                 jschSession.setConfig("StrictHostKeyChecking", "no");
                 jschSession.setPassword(credential.getSecret());
                 jschSession.connect();
@@ -64,9 +67,8 @@ public class SFTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<ChannelSftp.LsEntry> traversalStack = new Stack<>();
         HashMap<ChannelSftp.LsEntry, String> entryToFullPath = new HashMap<>();
-        if (basePath.isEmpty() || basePath == null) {
-            basePath = channelSftp.pwd() + "/";
-        }
+        if (basePath.isEmpty()) basePath = channelSftp.pwd();
+        if(!basePath.endsWith("/")) basePath += "/";
         if (userSelectedResources.isEmpty()) {
             Vector<ChannelSftp.LsEntry> fileVector = channelSftp.ls(basePath);
             for (ChannelSftp.LsEntry curr : fileVector) {

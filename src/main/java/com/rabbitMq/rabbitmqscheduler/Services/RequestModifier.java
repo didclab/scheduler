@@ -16,11 +16,10 @@ import java.util.*;
 
 @Service
 public class RequestModifier {
+    Logger logger = LoggerFactory.getLogger(RequestModifier.class);
 
     @Autowired
     CredentialService credentialService;
-
-    static final Logger logger = LoggerFactory.getLogger(RequestModifier.class);
     @Autowired
     SFTPExpander sftpExpander;
     @Autowired
@@ -31,35 +30,38 @@ public class RequestModifier {
     BoxExpander boxExpander;
     @Autowired
     DropBoxExpander dropBoxExpander;
+    @Autowired
+    GDriveExpander gDriveExpander;
+    @Autowired
+    HttpExpander httpExpander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
-    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{ "dropbox", "box", "gdrive", "gftp"}));
+    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
 
-    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources){
+    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources) {
         logger.info("The info list in select and expand is \n" + selectedResources.toString());
-        switch (source.getType()){
+        switch (source.getType()) {
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
                 return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case s3:
-                if(source.getParentInfo().getPath().equals("/")) source.getParentInfo().setPath("");
                 s3Expander.createClient(source.getVfsSourceCredential());
                 return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
                 sftpExpander.createClient(source.getVfsSourceCredential());
                 return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+            case http:
+                httpExpander.createClient(source.getVfsSourceCredential());
+                return httpExpander.expandedFileSystem(source.getInfoList(), source.getParentInfo().getPath());
             case box:
                 boxExpander.createClient(source.getOauthSourceCredential());
-                return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
-            case gftp:
-                return null;
-            case http:
-                return null;
+                return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
             case dropbox:
                 dropBoxExpander.createClient(source.getOauthSourceCredential());
-                return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
             case gdrive:
-                return null;
+                gDriveExpander.createClient(source.getOauthSourceCredential());
+                return gDriveExpander.expandedFileSystem(source.getInfoList(), source.getParentInfo().getId());
             /**
              * need to figure out how to handle the case of connectors deployed
              * This will be very experiemental but will probably not expand those requests.
@@ -78,7 +80,7 @@ public class RequestModifier {
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
-        s.setInfoList(odsTransferRequest.getSource().getInfoList());
+        //s.setInfoList(odsTransferRequest.getSource().getInfoList()); This is an extra setting of the
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
@@ -87,14 +89,14 @@ public class RequestModifier {
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
             AccountEndpointCredential sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(sourceCredential);
-        } else if(oautUsingType.contains(odsTransferRequest.getSource().getType().toString())){
+        } else if (oautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
             OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(sourceCredential);
         }
         if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            AccountEndpointCredential destinationCredential =  credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
+            AccountEndpointCredential destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setVfsDestCredential(destinationCredential);
-        } else if(oautUsingType.contains(odsTransferRequest.getDestination().getType().toString())){
+        } else if (oautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
@@ -109,16 +111,17 @@ public class RequestModifier {
     /**
      * Current little hack to make sure writing to S3 results in a chunkSize greater than 5MB if a multipart request.
      * This should be a property that is data mined in the optimization service
+     *
      * @param destType
      * @param chunkSize
      * @return
      */
-    public int correctChunkSize(EndPointType destType, int chunkSize){
-        if(destType.equals(EndPointType.s3) && chunkSize < 5000000) { //5MB as we work with bytes not bits!
+    public int correctChunkSize(EndPointType destType, int chunkSize) {
+        if (destType.equals(EndPointType.s3) && chunkSize < 5000000) { //5MB as we work with bytes not bits!
             return 10000000;
-        }else if(destType.equals(EndPointType.gdrive) && chunkSize < 5000000){
+        } else if (destType.equals(EndPointType.gdrive) && chunkSize < 5000000) {
             return 10000000;
-        }else{
+        } else {
             return chunkSize;
         }
     }

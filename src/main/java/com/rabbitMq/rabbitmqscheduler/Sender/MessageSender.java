@@ -15,7 +15,7 @@ public class MessageSender {
     private static final Logger logger = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
-    private RabbitTemplate rmqTemplate;
+    AmqpTemplate rmqTemplate;
 
     @Autowired
     DirectExchange directExchange;
