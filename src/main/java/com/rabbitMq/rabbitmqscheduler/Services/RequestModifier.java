@@ -31,8 +31,6 @@ public class RequestModifier {
     @Autowired
     DropBoxExpander dropBoxExpander;
     @Autowired
-    GDriveExpander gDriveExpander;
-    @Autowired
     HttpExpander httpExpander;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
@@ -59,9 +57,6 @@ public class RequestModifier {
             case dropbox:
                 dropBoxExpander.createClient(source.getOauthSourceCredential());
                 return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
-            case gdrive:
-                gDriveExpander.createClient(source.getOauthSourceCredential());
-                return gDriveExpander.expandedFileSystem(source.getInfoList(), source.getParentInfo().getId());
             /**
              * need to figure out how to handle the case of connectors deployed
              * This will be very experiemental but will probably not expand those requests.
