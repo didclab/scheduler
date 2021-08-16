@@ -5,7 +5,6 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
-import javax.swing.text.html.parser.Entity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class BoxExpanderTest extends TestCase {
 
     public OAuthEndpointCredential oAuthEndpointCredentialWithDevToken(){
         OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
-        oAuthEndpointCredential.setToken("lb0xaHpyPb9RTYpyKYumxLc1RUoXPtgd");//this is temporary dev token
+        oAuthEndpointCredential.setToken("P0CPejCfrgyIREvBLkcR7ICEFsZKphpL");//this is temporary dev token
         return oAuthEndpointCredential;
     }
 
@@ -25,7 +24,7 @@ public class BoxExpanderTest extends TestCase {
         List<EntityInfo> rootDirExpanded = testObj.expandedFileSystem(new ArrayList<>(), "");
         Assert.assertNotNull(rootDirExpanded);
         for(EntityInfo fileInfo: rootDirExpanded){
-            System.out.println(fileInfo.getId());
+            System.out.println(fileInfo.toString());
             Assert.assertNotNull(fileInfo);
             Assert.assertTrue(fileInfo.getSize() > 0);
             Assert.assertNotNull(fileInfo.getId());

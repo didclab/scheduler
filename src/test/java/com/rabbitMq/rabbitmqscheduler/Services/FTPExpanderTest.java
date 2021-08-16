@@ -36,12 +36,12 @@ public class FTPExpanderTest extends TestCase {
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
         createInfoList();
-        List<EntityInfo> fullFiles = testObj.expandedFileSystem(createInfoList(),"/");
+        List<EntityInfo> fullFiles = testObj.expandedFileSystem(createInfoList(),"");
         for(EntityInfo file: fullFiles){
             System.out.println(file.toString());
         }
 
-        Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
+        Assert.isTrue(fullFiles.size() > 0, "the amount of files on speed test tele2net");
     }
 
     public EntityInfo hundredMBFile(){

@@ -99,7 +99,7 @@ public class SFTPExpanderTest extends TestCase {
         ArrayList<EntityInfo> list = new ArrayList<>();
         list.add(listTwoFiles());
         list.add(listOneFile());
-        list.add(destDir());
+//        list.add(destDir());
         list.add(file());
         return list;
     }
@@ -120,7 +120,7 @@ public class SFTPExpanderTest extends TestCase {
     public void testExpandedFileSystem() {
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "/home/ubuntu");
+        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "/home/ubuntu/");
         Assert.isTrue(expandedList.size() > 0, "The client was not listing home");
     }
 
@@ -138,7 +138,7 @@ public class SFTPExpanderTest extends TestCase {
     public void testExpandFileSystemTwoDifferentDirectories() {
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(listTwoDirectories(), "");
+        List<EntityInfo> expandedList = testObj.expandedFileSystem(listTwoDirectories(), "/home/ubuntu/");
         Assert.isTrue(expandedList.size() == 3, "The size should be 3 ");
         for (EntityInfo info : expandedList) {
             System.out.println(info.toString());
