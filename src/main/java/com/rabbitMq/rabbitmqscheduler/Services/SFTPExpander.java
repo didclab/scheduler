@@ -34,8 +34,8 @@ public class SFTPExpander implements FileExpander {
         try {
             jsch.addIdentity("randomName", credential.getSecret().getBytes(), null, null);
             jschSession = jsch.getSession(credential.getUsername(), host, Integer.parseInt(port));
-            jschSession.connect();
             jschSession.setConfig("StrictHostKeyChecking", "no");
+            jschSession.connect();
             connected = true;
         } catch (JSchException ignored) {
             connected = false;
@@ -51,9 +51,10 @@ public class SFTPExpander implements FileExpander {
                 connected = false;
             }
         }
-        if (!connected) {
-            throw new JSchException("Unable to authenticate with the password/pem file");
-        }
+        assert jschSession != null;
+//        if (!jschSession.isConnected()) {
+//            throw new JSchException("Unable to authenticate with the password/pem file");
+//        }
         ChannelSftp channelSftp = (ChannelSftp) jschSession.openChannel("sftp");
         channelSftp.connect();
         this.channelSftp = channelSftp;

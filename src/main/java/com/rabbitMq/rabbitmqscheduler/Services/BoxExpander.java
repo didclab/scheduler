@@ -37,6 +37,7 @@ public class BoxExpander implements FileExpander{
                 transferFiles.add(boxFileToEntityInfo(temp));
                 isFile = true;
             }catch (BoxAPIException ignored){
+                logger.info("Tried to open {} as a file but it did not work", selectedResource.toString());
                 isFile = false;
             }
             if(!isFile){
@@ -44,7 +45,7 @@ public class BoxExpander implements FileExpander{
                     BoxFolder temp = new BoxFolder(this.connection, selectedResource.getId());
                     travStack.push(temp);
                 }catch (BoxAPIException ignored){
-                    logger.warn("Was unable to open the following thing {}", selectedResource.getId());
+                    logger.info("Tried to open {} as a folder but it did not work", selectedResource.toString());
                 }
             }
         }
