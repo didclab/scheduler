@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.amazonaws.services.s3.transfer.Transfer;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Null;
 import java.util.*;
 
 @Service
@@ -96,6 +98,9 @@ public class RequestModifier {
             d.setOauthDestCredential(destinationCredential);
         }
         List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
+        if(expandedFiles == null){
+            throw new NullPointerException();
+        }
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
