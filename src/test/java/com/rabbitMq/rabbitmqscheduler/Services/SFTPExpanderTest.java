@@ -25,6 +25,15 @@ public class SFTPExpanderTest extends TestCase {
         return publicKeyPEM;
     }
 
+    public AccountEndpointCredential rebexCredentialTest(){
+        AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
+        accountEndpointCredential.setUri("sftp://test.rebex.net:22");
+        accountEndpointCredential.setUsername("demo");
+        accountEndpointCredential.setSecret("password");
+        accountEndpointCredential.setAccountId("test");
+        return accountEndpointCredential;
+    }
+
     public AccountEndpointCredential createTestCredential() {
         String SFTPTESTSERVER = System.getenv("SFTP_TEST_SERVER");
         String SFTPTESTSERVERUSER = System.getenv("SFTP_TEST_SERVER_USER");
@@ -119,15 +128,18 @@ public class SFTPExpanderTest extends TestCase {
 
     public void testExpandedFileSystem() {
         testObj = new SFTPExpander();
-        testObj.createClient(createTestCredential());
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "/home/ubuntu/");
+        testObj.createClient(rebexCredentialTest());
+        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "");
+        expandedList.forEach(entityInfo -> {
+            System.out.println(entityInfo.toString());
+        });
         Assert.isTrue(expandedList.size() > 0, "The client was not listing home");
     }
 
     public void testTheUserHome() {
         testObj = new SFTPExpander();
         testObj.createClient(createTestCredential());
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "");
+        List<EntityInfo> expandedList = testObj.expandedFileSystem(new ArrayList<>(), "fulltest/");
         Assert.isTrue(expandedList.size() > 0, "unable to list the users home");
         for (EntityInfo fileInfo : expandedList) {
             System.out.println(fileInfo.toString());
