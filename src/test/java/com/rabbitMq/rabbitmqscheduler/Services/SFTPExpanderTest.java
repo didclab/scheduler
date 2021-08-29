@@ -9,7 +9,6 @@ import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.*;
@@ -135,22 +134,6 @@ public class SFTPExpanderTest extends TestCase {
             System.out.println(entityInfo.toString());
         });
         Assert.isTrue(expandedList.size() > 0, "The client was not listing home");
-    }
-
-    public void testExpandListWithAFileInIt(){
-        testObj = new SFTPExpander();
-        testObj.createClient(rebexCredentialTest());
-        ArrayList<EntityInfo> oneListFile = new ArrayList<>();
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("readme.txt");
-        oneListFile.add(entityInfo);
-        List<EntityInfo> expandedList = testObj.expandedFileSystem(oneListFile, "");
-        expandedList.forEach(e -> System.out.println(e.toString()));
-        Assert.isTrue(expandedList.size() == 1, "Tried to list one file in home but was unable too");
-    }
-
-    public void testExpandOneDirInHome(){
-
     }
 
     public void testTheUserHome() {
