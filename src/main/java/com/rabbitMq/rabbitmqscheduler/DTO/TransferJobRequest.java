@@ -22,7 +22,7 @@ public class TransferJobRequest {
     private String jobId;
     private String ownerId;
     private int priority;
-    private long chunkSize;
+    private int chunkSize;
     private Source source;
     private Destination destination;
     private TransferOptions options;
