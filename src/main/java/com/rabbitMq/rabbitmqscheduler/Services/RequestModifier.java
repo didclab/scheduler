@@ -116,7 +116,7 @@ public class RequestModifier {
      * @param chunkSize
      * @return
      */
-    public long correctChunkSize(EndPointType destType, long chunkSize) {
+    public int correctChunkSize(EndPointType destType, int chunkSize) {
         if (destType.equals(EndPointType.s3) && chunkSize < 5000000) { //5MB as we work with bytes not bits!
             return 10000000;
         } else if (destType.equals(EndPointType.gdrive) && chunkSize < 5000000) {
