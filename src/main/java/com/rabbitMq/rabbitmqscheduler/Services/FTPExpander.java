@@ -36,6 +36,7 @@ public class FTPExpander implements FileExpander {
     @Override
     public void createClient(EndpointCredential credential) {
         this.vfsCredential = EndpointCredential.getAccountCredential(credential);
+        logger.info(this.vfsCredential.toString());
         StaticUserAuthenticator auth = new StaticUserAuthenticator(null, this.vfsCredential.getUsername(), this.vfsCredential.getSecret());
         try {
             DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(generateOpts(), auth);
