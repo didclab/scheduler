@@ -22,6 +22,12 @@ public class FTPExpander implements FileExpander {
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
     static final Logger logger = LoggerFactory.getLogger(FTPExpander.class);
+    FileSystemOptions options;
+
+    public FTPExpander(){
+        this.options = generateOpts();
+    }
+
 
 
     public static FileSystemOptions generateOpts() {
@@ -39,7 +45,7 @@ public class FTPExpander implements FileExpander {
         logger.info(this.vfsCredential.toString());
         StaticUserAuthenticator auth = new StaticUserAuthenticator(null, this.vfsCredential.getUsername(), this.vfsCredential.getSecret());
         try {
-            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(generateOpts(), auth);
+            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
@@ -54,12 +60,12 @@ public class FTPExpander implements FileExpander {
         FileSystemManager fsm = VFS.getManager();
         if(basePath.isEmpty() || basePath == null || !basePath.endsWith("/")) basePath += "/";
         if(infoList.isEmpty()){
-            FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, generateOpts());
+            FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, this.options);
             traversalStack.push(obj);
         }else{
             for (EntityInfo e : this.infoList) {
                 logger.info(this.vfsCredential.getUri() + basePath + e.getId());
-                FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), generateOpts());
+                FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), this.options);
                 traversalStack.push(fObject);
             }
         }
