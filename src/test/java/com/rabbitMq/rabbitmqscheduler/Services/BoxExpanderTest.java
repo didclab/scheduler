@@ -14,7 +14,7 @@ public class BoxExpanderTest extends TestCase {
 
     public OAuthEndpointCredential oAuthEndpointCredentialWithDevToken(){
         OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
-        oAuthEndpointCredential.setToken("P0CPejCfrgyIREvBLkcR7ICEFsZKphpL");//this is temporary dev token
+        oAuthEndpointCredential.setToken("QTXmxws1IHaPql0ULa2bYnLn1bMJMyZ2");//this is temporary dev token
         return oAuthEndpointCredential;
     }
 
@@ -70,6 +70,31 @@ public class BoxExpanderTest extends TestCase {
         }
     }
 
+    public void testDestinationChunkSizeTrivial() {
+        List<EntityInfo> expandedFiles = new ArrayList<>();
+        testObj = new BoxExpander();
+        testObj.createClient(oAuthEndpointCredentialWithDevToken());
+        Assert.assertEquals(testObj.destinationChunkSize(expandedFiles, "", 64000), expandedFiles);
+    }
+
+    public void testDestinationChunkSizeWithChunkSizeWithOneFile() {
+        List<EntityInfo> expandedFiles = selectOnePretendFile();
+        testObj = new BoxExpander();
+        testObj.createClient(oAuthEndpointCredentialWithDevToken());
+        Assert.assertEquals(testObj.destinationChunkSize(expandedFiles, "", 64000), expandedFiles);
+    }
+
+    public void testDestinationChunkSizeBox(){
+        List<EntityInfo> testList = selectOnePretendFile();
+        int chunkSize = 100000;
+        testObj = new BoxExpander();
+        testObj.createClient(oAuthEndpointCredentialWithDevToken());
+        testList = testObj.destinationChunkSize(testList, "0", chunkSize);
+        Assert.assertTrue("The original chunkSize is not right for uploading to box",testList.get(0).getSize() != chunkSize);
+        System.out.println(testList.get(0).getChunkSize());
+    }
+
+
     public ArrayList<EntityInfo> createRootList(){
         ArrayList<EntityInfo> list = new ArrayList<>();
         EntityInfo rootInfo = new EntityInfo();
@@ -119,5 +144,16 @@ public class BoxExpanderTest extends TestCase {
         list.add(file);
         return list;
     }
+
+    public ArrayList<EntityInfo> selectOnePretendFile(){
+        ArrayList<EntityInfo> fileInfo = new ArrayList<>();
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setId("819400248751");
+        entityInfo.setPath("0");
+        entityInfo.setSize(411944960);
+        fileInfo.add(entityInfo);
+        return fileInfo;
+    }
+
 
 }

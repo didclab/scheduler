@@ -9,17 +9,19 @@ import com.amazonaws.services.s3.model.*;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
+import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import org.springframework.stereotype.Component;
+import org.w3c.dom.Entity;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
-public class S3Expander implements FileExpander{
+public class S3Expander extends DestinationChunkSize implements FileExpander{
 
     AmazonS3 s3Client;
     String[] regionAndBucket;
-    ListObjectsV2Request listSkeleton;
 
     @Override
     public void createClient(EndpointCredential cred) {
@@ -69,5 +71,17 @@ public class S3Expander implements FileExpander{
                     .withBucketName(regionAndBucket[1])
                     .withPrefix(path);
         }
+    }
+
+    @Override
+    public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize) {
+        for (EntityInfo fileInfo : expandedFiles) {
+            if(userChunkSize < 5000000){
+                fileInfo.setChunkSize(10000000);
+            }else{
+                fileInfo.setChunkSize(userChunkSize);
+            }
+        }
+        return expandedFiles;
     }
 }

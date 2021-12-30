@@ -14,7 +14,7 @@ public class DropBoxExpanderTest extends TestCase {
 
     public OAuthEndpointCredential devToken(){
         OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
-        oAuthEndpointCredential.setToken("");
+        oAuthEndpointCredential.setToken("sl.A_K-hQxIens5a7w82VXq2P1WekpuboaS5fLq4YfPLSF76k1fyBwFxqnR6D4kvnn8OMpqCEdw-Xc5x03P4FuJBT2ekcQ8q7v9sruwM6yp2sWhxjRyFQ-BV4ikvci9LRWmnyd6uY-0");
         return oAuthEndpointCredential;
     }
 
@@ -106,5 +106,28 @@ public class DropBoxExpanderTest extends TestCase {
         list.add(twoFile);
         list.add(threeFile);
         return list;
+    }
+
+    public void testDestinationChunkSizeSmallChunkSize() {
+        testObj = new DropBoxExpander();
+        testObj.createClient(devToken());
+        List<EntityInfo> expandedFiles = testObj.destinationChunkSize(goFile(), "", 1000);
+        Assert.assertTrue("DropBox has minimum chunk size of 4MB",expandedFiles.get(0).getChunkSize() == 4000000);
+    }
+
+    public void testDestinationChunkSizeLargeChunkSize(){
+        testObj = new DropBoxExpander();
+        testObj.createClient(devToken());
+        List<EntityInfo> expandedFiles = testObj.destinationChunkSize(goFile(), "", 10000000);
+        Assert.assertTrue("DropBox has minimum chunk size of 4MB",expandedFiles.get(0).getChunkSize() == 10000000);
+    }
+
+    public List<EntityInfo> goFile(){
+        List<EntityInfo> testList = new ArrayList<>();
+        EntityInfo goFile = new EntityInfo();
+        goFile.setId("(Bert Dodson) Keys to Drawing.pdf");
+        goFile.setSize(151551496);
+        testList.add(goFile);
+        return testList;
     }
 }

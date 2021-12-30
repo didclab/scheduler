@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class SFTPExpander implements FileExpander {
+public class SFTPExpander extends DestinationChunkSize implements FileExpander {
 
     AccountEndpointCredential credential;
     ChannelSftp channelSftp;

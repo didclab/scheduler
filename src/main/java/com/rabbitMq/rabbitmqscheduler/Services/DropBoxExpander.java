@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Stack;
 
 @Component
-public class DropBoxExpander implements FileExpander {
+public class DropBoxExpander extends DestinationChunkSize implements FileExpander {
 
     private DbxClientV2 client;
 
@@ -86,5 +86,19 @@ public class DropBoxExpander implements FileExpander {
             e.printStackTrace();
         }
         return new ArrayList<>();
+    }
+
+    @Override
+    public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize){
+        for(EntityInfo fileInfo : expandedFiles){
+            if(fileInfo.getSize() < 8L << 20){
+                fileInfo.setChunkSize(Long.valueOf(fileInfo.getSize()).intValue());
+            }else if(userChunkSize < 4L << 20){
+                fileInfo.setChunkSize(4000000);
+            }else{
+                fileInfo.setChunkSize(userChunkSize);
+            }
+        }
+        return expandedFiles;
     }
 }
