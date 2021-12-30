@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.*;
 
 @Service
-public class FTPExpander implements FileExpander {
+public class FTPExpander extends DestinationChunkSize implements FileExpander {
 
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;

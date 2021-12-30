@@ -14,7 +14,7 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Component
-public class BoxExpander implements FileExpander{
+public class BoxExpander extends DestinationChunkSize implements FileExpander {
 
     BoxAPIConnection connection;
     Logger logger = LoggerFactory.getLogger(BoxExpander.class);
@@ -66,6 +66,17 @@ public class BoxExpander implements FileExpander{
         return transferFiles;
     }
 
+    @Override
+    public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize) {
+        BoxFolder destinationUploadFolder = new BoxFolder(this.connection, basePath);
+        for(EntityInfo entityInfo : expandedFiles){
+            BoxFileUploadSession.Info uploadSession = destinationUploadFolder.createUploadSession(entityInfo.getId(), entityInfo.getSize());
+            entityInfo.setChunkSize(uploadSession.getPartSize());
+        }
+        return expandedFiles;
+    }
+
+
     public EntityInfo boxFileToEntityInfo(BoxFile boxFile) {
         BoxFile.Info boxFileInfo = boxFile.getInfo();
         EntityInfo fileInfo = new EntityInfo();
@@ -74,5 +85,4 @@ public class BoxExpander implements FileExpander{
         fileInfo.setSize(boxFileInfo.getSize());
         return fileInfo;
     }
-
 }

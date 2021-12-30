@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class HttpExpander implements FileExpander{
+public class HttpExpander extends DestinationChunkSize implements FileExpander{
     @Override
     public void createClient(EndpointCredential credential) {
 

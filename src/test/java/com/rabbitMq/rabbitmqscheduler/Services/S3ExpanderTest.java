@@ -5,7 +5,6 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import junit.framework.TestCase;
 import org.springframework.util.Assert;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,8 +46,8 @@ public class S3ExpanderTest extends TestCase {
         testObj.createClient(createTestCredentials());
         ArrayList<EntityInfo> list = new ArrayList<>();
         EntityInfo fileInfo = new EntityInfo();
-        fileInfo.setPath("100KB.zip");
-        fileInfo.setId("100KB.zip");
+        fileInfo.setPath("100MB.zip");
+        fileInfo.setId("100MB.zip");
         fileInfo.setSize(32);
         list.add(fileInfo);
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "");
@@ -62,10 +61,33 @@ public class S3ExpanderTest extends TestCase {
     public void testExpandWholeBucketWithSlash() {
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "/");
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
         Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
         for(int i = 0; i < expandedBucketFiles.size(); i++){
             System.out.println(expandedBucketFiles.get(i).toString());
         }
     }
+
+    public void testDestinationChunkSizeGoFile(){
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        List<EntityInfo> testList = testObj.destinationChunkSize(goFile(), "", 1000);
+        Assert.isTrue(testList.get(0).getChunkSize() == 10000000, "The proper chunk size was not set");
+    }
+    public void testDestinationChunkSizeGoFileLargeChunkSize(){
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        List<EntityInfo> testList = testObj.destinationChunkSize(goFile(), "", 10000000);
+        Assert.isTrue(testList.get(0).getChunkSize() == 10000000, "The proper chunk size was not set");
+    }
+
+    public List<EntityInfo> goFile(){
+        List<EntityInfo> testList = new ArrayList<>();
+        EntityInfo goFile = new EntityInfo();
+        goFile.setId("go1.16beta1.darwin-amd64.tar");
+        goFile.setSize(411944960);
+        testList.add(goFile);
+        return testList;
+    }
+
 }

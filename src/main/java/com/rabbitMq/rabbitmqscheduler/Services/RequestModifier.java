@@ -1,6 +1,5 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
-import com.amazonaws.services.s3.transfer.Transfer;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferOptions;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
@@ -13,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.Null;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class RequestModifier {
@@ -59,12 +58,35 @@ public class RequestModifier {
             case dropbox:
                 dropBoxExpander.createClient(source.getOauthSourceCredential());
                 return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
-            /**
-             * need to figure out how to handle the case of connectors deployed
-             * This will be very experiemental but will probably not expand those requests.
-             */
             case vfs:
                 return selectedResources;
+        }
+        return null;
+    }
+
+    /**
+     * This method is supposed to take a list of Files that are expanded and make sure the chunk size being used is supported by the source/destination
+     * So far all what I can tell is that Box has an "optimized" chunk size that we should use to write too.
+     * @param entityInfo
+     * @param destination
+     * @param userChunkSize
+     * @return List of Files that have the proper chunkSize to use during the transfer.
+     */
+    public List<EntityInfo> checkDestinationChunkSize(List<EntityInfo> entityInfo, TransferJobRequest.Destination destination, Integer userChunkSize){
+        switch (destination.getType()){
+            case box:
+                boxExpander.createClient(destination.getOauthDestCredential());
+                return boxExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
+            case dropbox:
+                return dropBoxExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
+            case ftp:
+                return ftpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
+            case sftp:
+                return sftpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
+            case s3:
+                return s3Expander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
+            case http:
+                return httpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
         }
         return null;
     }
@@ -77,7 +99,6 @@ public class RequestModifier {
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
-        //s.setInfoList(odsTransferRequest.getSource().getInfoList()); This is an extra setting of the
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
@@ -97,10 +118,8 @@ public class RequestModifier {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
-        List<EntityInfo> expandedFiles = selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
-        if(expandedFiles == null){
-            throw new NullPointerException();
-        }
+        List<EntityInfo> expandedFiles = this.selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
+        expandedFiles = this.checkDestinationChunkSize(expandedFiles, d, odsTransferRequest.getOptions().getChunkSize());
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
@@ -109,13 +128,15 @@ public class RequestModifier {
     }
 
     /**
+     *
      * Current little hack to make sure writing to S3 results in a chunkSize greater than 5MB if a multipart request.
      * This should be a property that is data mined in the optimization service
-     *
+     * This method should not be used and is only kept here to support the compatability with an API change where chunkSize was set for the entire transfer and not per file basis.
      * @param destType
      * @param chunkSize
      * @return
      */
+    @Deprecated
     public int correctChunkSize(EndPointType destType, int chunkSize) {
         if (destType.equals(EndPointType.s3) && chunkSize < 5000000) { //5MB as we work with bytes not bits!
             return 10000000;
