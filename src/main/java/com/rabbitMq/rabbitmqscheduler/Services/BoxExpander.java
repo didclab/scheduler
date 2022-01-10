@@ -70,8 +70,12 @@ public class BoxExpander extends DestinationChunkSize implements FileExpander {
     public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize) {
         BoxFolder destinationUploadFolder = new BoxFolder(this.connection, basePath);
         for(EntityInfo entityInfo : expandedFiles){
-            BoxFileUploadSession.Info uploadSession = destinationUploadFolder.createUploadSession(entityInfo.getId(), entityInfo.getSize());
-            entityInfo.setChunkSize(uploadSession.getPartSize());
+            if(entityInfo.getSize() < 1024*1024*20){
+                entityInfo.setChunkSize(Math.toIntExact(entityInfo.getSize()));
+            }else{
+                BoxFileUploadSession.Info uploadSession = destinationUploadFolder.createUploadSession(entityInfo.getId(), entityInfo.getSize());
+                entityInfo.setChunkSize(uploadSession.getPartSize());
+            }
         }
         return expandedFiles;
     }
