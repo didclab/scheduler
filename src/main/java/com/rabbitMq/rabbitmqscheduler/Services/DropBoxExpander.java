@@ -8,12 +8,11 @@ import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
+import org.bouncycastle.asn1.cms.MetaData;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 @Component
 public class DropBoxExpander extends DestinationChunkSize implements FileExpander {
@@ -82,9 +81,10 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
     public List<Metadata> listOp(String path) {
         try {
             return this.client.files().listFolderBuilder(path).start().getEntries();
-        } catch (DbxException e) {
-            e.printStackTrace();
-        }
+        } catch (DbxException e) {}
+        try{
+            return Collections.singletonList(this.client.files().getMetadata(path));
+        } catch (DbxException e){}
         return new ArrayList<>();
     }
 
