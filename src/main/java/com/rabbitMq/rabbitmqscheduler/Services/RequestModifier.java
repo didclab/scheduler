@@ -60,6 +60,9 @@ public class RequestModifier {
                 return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
             case vfs:
                 return selectedResources;
+            case scp:
+                sftpExpander.createClient(source.getVfsSourceCredential());
+                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
         }
         return null;
     }
