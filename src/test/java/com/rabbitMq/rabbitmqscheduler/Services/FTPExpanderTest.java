@@ -1,11 +1,13 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.dropbox.core.v2.users.Account;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import junit.framework.TestCase;
 import org.springframework.util.Assert;
 
 import javax.swing.text.html.parser.Entity;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,15 @@ public class FTPExpanderTest extends TestCase {
         return accountEndpointCredential;
     }
 
+    public AccountEndpointCredential testNCBICredential(){
+        AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
+        accountEndpointCredential.setAccountId("testuser@helloworld.com");
+        accountEndpointCredential.setUsername("anonymous");
+        accountEndpointCredential.setSecret("anonymous");
+        accountEndpointCredential.setUri("ftp://ftp.ncbi.nih.gov:21");
+        return accountEndpointCredential;
+    }
+
     public void testlistAllFilesFromSpeedTest() {
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
@@ -32,10 +43,25 @@ public class FTPExpanderTest extends TestCase {
         Assert.isTrue(fullFiles.size() >0, "the amount of files on speed test tele2net");
     }
 
+    public void testListingOneGB(){
+        testObj = new FTPExpander();
+        testObj.createClient(testNCBICredential());
+        ArrayList<EntityInfo> selectedFolders = new ArrayList<>();
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("1GB");
+        fileInfo.setPath("1GB");
+        selectedFolders.add(fileInfo);
+        List<EntityInfo> fullFiles = testObj.expandedFileSystem(selectedFolders,"");
+        for(EntityInfo file: fullFiles){
+            System.out.println(file.toString());
+        }
+
+        Assert.isTrue(fullFiles.size() > 0, "the amount of files on speed test tele2net");
+    }
+
     public void testListingUploadAndHundreMB(){
         testObj = new FTPExpander();
         testObj.createClient(testFTPCredential());
-        createInfoList();
         List<EntityInfo> fullFiles = testObj.expandedFileSystem(createInfoList(),"");
         for(EntityInfo file: fullFiles){
             System.out.println(file.toString());
