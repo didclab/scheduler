@@ -47,6 +47,7 @@ public class RequestModifier {
                 s3Expander.createClient(source.getVfsSourceCredential());
                 return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case sftp:
+            case scp:
                 sftpExpander.createClient(source.getVfsSourceCredential());
                 return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case http:
@@ -60,9 +61,6 @@ public class RequestModifier {
                 return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
             case vfs:
                 return selectedResources;
-            case scp:
-                sftpExpander.createClient(source.getVfsSourceCredential());
-                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
         }
         return null;
     }
@@ -85,6 +83,7 @@ public class RequestModifier {
             case ftp:
                 return ftpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
             case sftp:
+            case scp:
                 return sftpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
             case s3:
                 return s3Expander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
