@@ -35,9 +35,11 @@ public class MessageSender {
         if(odsTransferRequest.getSource().getType().equals(EndPointType.vfs) || odsTransferRequest.getDestination().getType().equals(EndPointType.vfs)){
             //for any connector transfer where the user has their own queue.
             String userNotEmail = odsTransferRequest.getOwnerId().split("@")[0];
-            String rKey = userNotEmail + "-Binding";
+            String destinationTransferType = odsTransferRequest.getDestination().getType().name();
+            //String rKey = userNotEmail + "-Binding";
+            String rKey = String.format("%s-%s-Binding", userNotEmail, destinationTransferType);
             String queueName = userNotEmail+ "-Queue";
-            establishConnectorQueue(queueName, rKey);
+            establishConnectorQueue(rKey, rKey);
             logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
             rmqTemplate.convertAndSend(exchange, rKey, odsTransferRequest);
         }else{

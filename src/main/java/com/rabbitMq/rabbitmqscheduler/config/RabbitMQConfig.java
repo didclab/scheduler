@@ -52,7 +52,7 @@ public class RabbitMQConfig {
         return new Jackson2JsonMessageConverter();
     }
 
-    @LoadBalanced
+   // @LoadBalanced
     @Bean
     RestTemplate restTemplate() {
         return new RestTemplate();
