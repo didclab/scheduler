@@ -41,12 +41,11 @@ public class MessageSender {
             String queueName = userNotEmail+ "-Queue";
             String rKey = queueName;
             if(sourceVfs){
-                queueName = source.getCredId();
+                queueName = source.getCredId().toLowerCase();
             }
             if (destVfs){
-                queueName = destination.getCredId();
+                queueName = destination.getCredId().toLowerCase();
             }
-
             establishConnectorQueue(queueName, rKey);
             logger.debug("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
             rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
