@@ -14,7 +14,6 @@ public class BoxExpanderTest extends TestCase {
 
     public OAuthEndpointCredential oAuthEndpointCredentialWithDevToken(){
         OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
-        oAuthEndpointCredential.setToken("QTXmxws1IHaPql0ULa2bYnLn1bMJMyZ2");//this is temporary dev token
         return oAuthEndpointCredential;
     }
 
@@ -84,6 +83,15 @@ public class BoxExpanderTest extends TestCase {
         Assert.assertEquals(testObj.destinationChunkSize(expandedFiles, "", 64000), expandedFiles);
     }
 
+    public void testOneDir(){
+        testObj = new BoxExpander();
+        testObj.createClient(oAuthEndpointCredentialWithDevToken());
+        List<EntityInfo> fileInfos = testObj.expandedFileSystem(this.testOneDirPoo(), "");
+        Assert.assertEquals(1, fileInfos.size());
+        Assert.assertEquals("847290704115", fileInfos.get(0).getId());
+        System.out.println(fileInfos.get(0).toString());
+    }
+
     public void testDestinationChunkSizeBox(){
         List<EntityInfo> testList = selectOnePretendFile();
         int chunkSize = 100000;
@@ -94,6 +102,14 @@ public class BoxExpanderTest extends TestCase {
         System.out.println(testList.get(0).getChunkSize());
     }
 
+    public List<EntityInfo> testOneDirPoo(){
+        List<EntityInfo> arrayList = new ArrayList<>();
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setId("154484914681");
+//        entityInfo.setPath("154484914681");
+        arrayList.add(entityInfo);
+        return arrayList;
+    }
 
     public ArrayList<EntityInfo> createRootList(){
         ArrayList<EntityInfo> list = new ArrayList<>();
