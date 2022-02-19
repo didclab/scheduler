@@ -25,6 +25,9 @@ public class MessageSender {
     @Autowired
     AmqpAdmin amqpAdmin;
 
+    @Value("${ods.rabbitmq.queue}")
+    private String queueName;
+
     @Value("${ods.rabbitmq.exchange}")
     private String exchange;
 
@@ -48,7 +51,7 @@ public class MessageSender {
             }
             establishConnectorQueue(queueName, rKey);
             logger.debug("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
-            rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
+            rmqTemplate.convertAndSend(exchange, this.queueName, odsTransferRequest);
         }else{
             //for all transfers that are using the ODS backend
             rmqTemplate.convertAndSend(exchange, routingkey, odsTransferRequest);

@@ -90,7 +90,7 @@ public class RequestModifier {
             case http:
                 return httpExpander.destinationChunkSize(entityInfo, destination.getParentInfo().getPath(), userChunkSize);
         }
-        return null;
+        return entityInfo;
     }
 
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
