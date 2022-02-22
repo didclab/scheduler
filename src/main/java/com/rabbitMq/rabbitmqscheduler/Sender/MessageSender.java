@@ -54,7 +54,7 @@ public class MessageSender {
             rmqTemplate.convertAndSend(exchange, this.queueName, odsTransferRequest);
         }else{
             //for all transfers that are using the ODS backend
-            rmqTemplate.convertAndSend(exchange, routingkey, odsTransferRequest);
+            rmqTemplate.convertAndSend(exchange, this.queueName, odsTransferRequest);
         }
         logger.info("Processed Job with ID: " + odsTransferRequest.getJobId());
     }
