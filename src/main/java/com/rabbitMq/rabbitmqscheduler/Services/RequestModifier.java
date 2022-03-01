@@ -34,6 +34,9 @@ public class RequestModifier {
     @Autowired
     HttpExpander httpExpander;
 
+    @Autowired
+    GDriveExpander gDriveExpander;
+
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
     Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
 
@@ -61,6 +64,10 @@ public class RequestModifier {
                 return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
             case vfs:
                 return selectedResources;
+            case gdrive:
+                gDriveExpander.createClient(source.getOauthSourceCredential());
+                return gDriveExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
+
         }
         return null;
     }
