@@ -32,6 +32,7 @@ public class TransferJobRequest {
     @NoArgsConstructor
     public static class Destination {
         private EndPointType type;
+        String credId;
         private AccountEndpointCredential vfsDestCredential;
         private OAuthEndpointCredential oauthDestCredential;
         private EntityInfo parentInfo;
@@ -42,6 +43,7 @@ public class TransferJobRequest {
     @NoArgsConstructor
     public static class Source {
         private EndPointType type;
+        String credId;
         private AccountEndpointCredential vfsSourceCredential;
         private OAuthEndpointCredential oauthSourceCredential;
         private EntityInfo parentInfo;

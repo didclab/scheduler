@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class RequestModifier {
@@ -108,10 +107,12 @@ public class RequestModifier {
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
         TransferJobRequest.Source s = new TransferJobRequest.Source();
+        s.setCredId(odsTransferRequest.getSource().getCredId());
         s.setParentInfo(odsTransferRequest.getSource().getParentInfo());
         s.setType(odsTransferRequest.getSource().getType());
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
         d.setParentInfo(odsTransferRequest.getDestination().getParentInfo());
+        d.setCredId(odsTransferRequest.getDestination().getCredId());
         d.setType(odsTransferRequest.getDestination().getType());
         if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
             AccountEndpointCredential sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
