@@ -42,9 +42,15 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
             traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
         }else{
             for(EntityInfo userSelectedResource: userSelectedResources){
-                String path = basePath+userSelectedResource.getPath();
-                ListObjectsV2Result result = this.s3Client.listObjectsV2(createSkeletonPerResource(path));
-                traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
+                if(this.s3Client.doesObjectExist(this.regionAndBucket[1],userSelectedResource.getId())){
+                    ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],userSelectedResource.getId());
+                    userSelectedResource.setSize(metadata.getContentLength());
+                    traversedFiles.add(userSelectedResource);
+                }else{
+                    String path = basePath+userSelectedResource.getPath();
+                    ListObjectsV2Result result = this.s3Client.listObjectsV2(createSkeletonPerResource(path));
+                    traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
+                }
             }
         }
         return traversedFiles;
