@@ -40,17 +40,16 @@ public class MessageSender {
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
         if(sourceVfs || destVfs){
             //for any vfs transfer where the user has their own transfer-service running on their host.
-            String userNotEmail = odsTransferRequest.getOwnerId().split("@")[0];
-            String queueName = userNotEmail+ "-Queue";
+            String queueName = "";
             String rKey = queueName;
             if(sourceVfs){
-                queueName = source.getCredId().toLowerCase() + "-Queue";
+                queueName = source.getCredId().toLowerCase();
             }
             if (destVfs){
-                queueName = destination.getCredId().toLowerCase() + "-Queue";
+                queueName = destination.getCredId().toLowerCase();
             }
             establishConnectorQueue(queueName, rKey);
-            logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
+            logger.info("User email prefix is "+odsTransferRequest.getOwnerId()+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
             rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
         }else{
             //for all transfers that are using the ODS backend
