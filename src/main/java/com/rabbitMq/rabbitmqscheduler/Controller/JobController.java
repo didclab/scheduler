@@ -23,10 +23,9 @@ public class JobController {
 
     @PostMapping(value = "/receiveRequest")
     public TransferJobResponse receiveRequest(@RequestBody RequestFromODS odsTransferRequest) {
-        logger.info("Recieved message with id " + odsTransferRequest.getOwnerId());
+        logger.info("Received message with id " + odsTransferRequest.getOwnerId());
         TransferJobRequest transferJobRequest = requestModifier.createRequest(odsTransferRequest);
         messageSender.sendTransferRequest(transferJobRequest, odsTransferRequest.getSource(), odsTransferRequest.getDestination());
-        logger.info(transferJobRequest.toString());
         TransferJobResponse response = new TransferJobResponse();
         response.setId(transferJobRequest.getJobId());//this will need to be read in from CDB?
         response.setMessage("Job Submitted");
