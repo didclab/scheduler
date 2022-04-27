@@ -2,8 +2,6 @@ package com.rabbitMq.rabbitmqscheduler.DTO.credential;
 
 import lombok.Data;
 import lombok.ToString;
-import lombok.experimental.Accessors;
-
 import java.util.Date;
 
 /**
