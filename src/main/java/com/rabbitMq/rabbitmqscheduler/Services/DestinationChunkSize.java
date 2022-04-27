@@ -13,6 +13,9 @@ public abstract class DestinationChunkSize {
      * @return
      */
     public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize){
+        if(userChunkSize > 15000000){
+            userChunkSize = 14900000;
+        }
         for(EntityInfo fileInfo : expandedFiles){
             fileInfo.setChunkSize(userChunkSize);
         }
