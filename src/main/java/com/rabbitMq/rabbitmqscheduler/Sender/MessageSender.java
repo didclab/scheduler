@@ -44,16 +44,17 @@ public class MessageSender {
             String queueName = userNotEmail+ "-Queue";
             String rKey = queueName;
             if(sourceVfs){
-                queueName = source.getCredId().toLowerCase();
+                queueName = source.getCredId().toLowerCase() + "-Queue";
             }
             if (destVfs){
-                queueName = destination.getCredId().toLowerCase();
+                queueName = destination.getCredId().toLowerCase() + "-Queue";
             }
             establishConnectorQueue(queueName, rKey);
-            logger.debug("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
-            rmqTemplate.convertAndSend(exchange, this.queueName, odsTransferRequest);
+            logger.info("User email prefix is "+userNotEmail+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
+            rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
         }else{
             //for all transfers that are using the ODS backend
+            logger.info("User email prefix is "+ odsTransferRequest.getOwnerId()+" and the queueName for our messages is " + queueName);
             rmqTemplate.convertAndSend(exchange, this.queueName, odsTransferRequest);
         }
         logger.info("Processed Job with ID: " + odsTransferRequest.getJobId());
