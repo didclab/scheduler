@@ -1,6 +1,7 @@
 package com.rabbitMq.rabbitmqscheduler.DTO.credential;
 
 import lombok.Data;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Date;
  */
 @Data
 public class OAuthEndpointCredential extends EndpointCredential {
+    @ToString.Exclude
     private String token;
     private boolean tokenExpires = false;
     private Date expiresAt;
