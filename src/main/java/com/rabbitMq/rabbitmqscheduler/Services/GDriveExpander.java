@@ -105,9 +105,7 @@ public class GDriveExpander extends DestinationChunkSize implements FileExpander
     private EntityInfo googleFileToEntityInfo(File googleFile){
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setId(googleFile.getId());
-        if(googleFile.getMimeType().equals("application/vnd.google-apps.document")){
-            entityInfo.setSize(-1);
-        }
+        entityInfo.setSize(googleFile.getSize());
         entityInfo.setPath(String.valueOf(googleFile.getParents()));
         return entityInfo;
     }
