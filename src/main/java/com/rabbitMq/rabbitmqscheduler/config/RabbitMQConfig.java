@@ -33,18 +33,8 @@ public class RabbitMQConfig {
 
 
     @Bean
-    Queue queue() {
-        return new Queue(queueName, true);
-    }
-
-    @Bean
     DirectExchange exchange() {
         return new DirectExchange(exchange);
-    }
-
-    @Bean
-    Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingkey);
     }
 
     @Bean
