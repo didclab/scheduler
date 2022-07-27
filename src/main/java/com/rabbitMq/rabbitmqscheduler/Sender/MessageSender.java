@@ -43,10 +43,10 @@ public class MessageSender {
             String queueName = "";
             String rKey = queueName;
             if(sourceVfs){
-                queueName = source.getCredId().toLowerCase();
+                queueName = source.getCredId();
             }
             if (destVfs){
-                queueName = destination.getCredId().toLowerCase();
+                queueName = destination.getCredId();
             }
             establishConnectorQueue(queueName, rKey);
             logger.info("User email prefix is "+odsTransferRequest.getOwnerId()+" and the routeKey is "+rKey+" and the queueName for our messages is " + queueName);
