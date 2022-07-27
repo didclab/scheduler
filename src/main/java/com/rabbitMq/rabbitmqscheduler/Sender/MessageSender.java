@@ -60,7 +60,7 @@ public class MessageSender {
     }
 
     public void establishConnectorQueue(String queueName, String rKey){
-        Queue queue = new Queue(queueName, true);
+        Queue queue = new Queue(queueName, true, false, true);
         amqpAdmin.declareQueue(queue);
         Binding binding = BindingBuilder.bind(queue)
                 .to(directExchange)
