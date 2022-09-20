@@ -13,15 +13,14 @@ public class S3ExpanderTest extends TestCase {
     S3Expander testObj;
 
     public AccountEndpointCredential createTestCredentials() {
-        String S3TESTKEY = System.getenv("AWS_JACOB_S3_KEY");
-        String S3TESTSECRET = System.getenv("AWS_JACOB_S3_SECRET");
+        String S3TESTKEY = "";
+        String S3TESTSECRET = "";
         AccountEndpointCredential accountEndpointCredential = new AccountEndpointCredential();
         accountEndpointCredential.setAccountId("hello@test.com");
-        accountEndpointCredential.setUri("us-east-2:::jacobstestbucket");
+        accountEndpointCredential.setUri("us-east-2:::odscerts");
         accountEndpointCredential.setUsername(S3TESTKEY);
         accountEndpointCredential.setSecret(S3TESTSECRET);
         return accountEndpointCredential;
-
     }
 
     public void testCreateClient() {
@@ -46,9 +45,8 @@ public class S3ExpanderTest extends TestCase {
         testObj.createClient(createTestCredentials());
         ArrayList<EntityInfo> list = new ArrayList<>();
         EntityInfo fileInfo = new EntityInfo();
-        fileInfo.setPath("100MB.zip");
-        fileInfo.setId("100MB.zip");
-        fileInfo.setSize(32);
+        fileInfo.setPath("transferCDB_Certs/ca.crt");
+        fileInfo.setId("transferCDB_Certs/ca.crt");
         list.add(fileInfo);
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "");
         Assert.isTrue(expandedBucketFiles.size() == 1, "The size should be one");
@@ -79,6 +77,44 @@ public class S3ExpanderTest extends TestCase {
         testObj.createClient(createTestCredentials());
         List<EntityInfo> testList = testObj.destinationChunkSize(goFile(), "", 10000000);
         Assert.isTrue(testList.get(0).getChunkSize() == 10000000, "The proper chunk size was not set");
+    }
+
+    public void testExpandPrefix(){
+        testObj = new S3Expander();
+        AccountEndpointCredential cred = createTestCredentials();
+        testObj.createClient(createTestCredentials());
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setPath("transfer_service_secrets/");
+        entityInfo.setId("transfer_service_secrets/");
+        List<EntityInfo> folder = new ArrayList<>();
+        folder.add(entityInfo);
+        List<EntityInfo> testList = testObj.expandedFileSystem(folder, "transfer_service_secrets/");
+        for(EntityInfo fileInfo : testList){
+            System.out.println(fileInfo.toString());
+        }
+        Assert.isTrue(testList.size() >3);
+    }
+
+    public void testExpandTwoPrefix(){
+        testObj = new S3Expander();
+        AccountEndpointCredential cred = createTestCredentials();
+        testObj.createClient(createTestCredentials());
+        EntityInfo folder1 = new EntityInfo();
+        folder1.setPath("transfer_service_secrets/");
+        folder1.setId("transfer_service_secrets/");
+        EntityInfo folder2 = new EntityInfo();
+        folder2.setPath("transferCDB_Certs/");
+        folder2.setId("transferCDB_Certs/");
+
+        List<EntityInfo> folder = new ArrayList<>();
+        folder.add(folder1);
+        folder.add(folder2);
+        List<EntityInfo> testList = testObj.expandedFileSystem(folder, "/");
+        for(EntityInfo fileInfo : testList){
+            System.out.println(fileInfo.toString());
+        }
+        Assert.isTrue(testList.size() == 8, "There should be 8 files we are listing from two directories");
+
     }
 
     public List<EntityInfo> goFile(){

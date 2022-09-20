@@ -40,19 +40,28 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
         if(userSelectedResources.isEmpty()){//expand the whole bucket relative to the basePath
             ListObjectsV2Result result = this.s3Client.listObjectsV2(createSkeletonPerResource(basePath));
             traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
-        }else{
-            for(EntityInfo userSelectedResource: userSelectedResources){
-                if(this.s3Client.doesObjectExist(this.regionAndBucket[1],userSelectedResource.getId())){
-                    ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],userSelectedResource.getId());
-                    userSelectedResource.setSize(metadata.getContentLength());
-                    traversedFiles.add(userSelectedResource);
-                }else{
-                    String path = basePath+userSelectedResource.getPath();
-                    ListObjectsV2Result result = this.s3Client.listObjectsV2(createSkeletonPerResource(path));
-                    traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
+        }
+        for(EntityInfo userSelectedResource: userSelectedResources){
+            //we have a folder/prefix for s3
+            if (userSelectedResource.getPath().endsWith("/")){
+                ListObjectsV2Request req = createSkeletonPerResource(userSelectedResource.getPath());
+                ListObjectsV2Result res = this.s3Client.listObjectsV2(req);
+                for(S3ObjectSummary obj : res.getObjectSummaries()){
+                    if(obj.getKey().endsWith("/")) continue;
+                    EntityInfo entityInfo = new EntityInfo();
+                    entityInfo.setId(obj.getKey());
+                    entityInfo.setPath(obj.getKey());
+                    entityInfo.setSize(obj.getSize());
+                    traversedFiles.add(entityInfo);
                 }
+                // the case where the user selected a file
+            } else if(this.s3Client.doesObjectExist(this.regionAndBucket[1],userSelectedResource.getId())){
+                ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],userSelectedResource.getId());
+                userSelectedResource.setSize(metadata.getContentLength());
+                traversedFiles.add(userSelectedResource);
             }
         }
+
         return traversedFiles;
     }
 
