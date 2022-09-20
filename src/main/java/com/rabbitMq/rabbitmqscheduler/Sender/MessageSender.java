@@ -37,6 +37,7 @@ public class MessageSender {
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
         if (sourceVfs || destVfs) {
             //for any vfs transfer where the user has their own transfer-service running on their metal.
+            String routingKey = this.routingKey;
             if (sourceVfs) {
                 routingKey = source.getCredId().toLowerCase();
             }
