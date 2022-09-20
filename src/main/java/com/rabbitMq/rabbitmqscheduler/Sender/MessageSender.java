@@ -29,7 +29,7 @@ public class MessageSender {
     private String exchange;
 
     @Value("${ods.rabbitmq.routingkey}")
-    private String routingkey;
+    private String routingKey;
 
     public void sendTransferRequest(TransferJobRequest odsTransferRequest, RequestFromODS.@NonNull Source source, RequestFromODS.@NonNull Destination destination) {
         logger.debug(odsTransferRequest.toString());
@@ -37,7 +37,6 @@ public class MessageSender {
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
         if (sourceVfs || destVfs) {
             //for any vfs transfer where the user has their own transfer-service running on their metal.
-            String routingKey = "";
             if (sourceVfs) {
                 routingKey = source.getCredId().toLowerCase();
             }
