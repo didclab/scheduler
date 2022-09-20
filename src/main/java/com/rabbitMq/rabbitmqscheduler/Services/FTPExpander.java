@@ -9,15 +9,25 @@ import org.apache.commons.vfs2.auth.StaticUserAuthenticator;
 import org.apache.commons.vfs2.impl.DefaultFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.apache.commons.vfs2.provider.ftp.FtpFileType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.*;
 
 @Service
-public class FTPExpander implements FileExpander {
+public class FTPExpander extends DestinationChunkSize implements FileExpander {
 
     AccountEndpointCredential vfsCredential;
     List<EntityInfo> infoList;
+    static final Logger logger = LoggerFactory.getLogger(FTPExpander.class);
+    FileSystemOptions options;
+
+    public FTPExpander(){
+        this.options = generateOpts();
+    }
+
 
 
     public static FileSystemOptions generateOpts() {
@@ -34,7 +44,7 @@ public class FTPExpander implements FileExpander {
         this.vfsCredential = EndpointCredential.getAccountCredential(credential);
         StaticUserAuthenticator auth = new StaticUserAuthenticator(null, this.vfsCredential.getUsername(), this.vfsCredential.getSecret());
         try {
-            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(generateOpts(), auth);
+            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
@@ -47,33 +57,37 @@ public class FTPExpander implements FileExpander {
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<FileObject> traversalStack = new Stack<>();
         FileSystemManager fsm = VFS.getManager();
-        if(basePath.isEmpty() || basePath == null) basePath = "/";
+        if(basePath.isEmpty() || basePath == null || !basePath.endsWith("/")) basePath += "/";
         if(infoList.isEmpty()){
-            FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, generateOpts());
+            FileObject obj = fsm.resolveFile(this.vfsCredential.getUri() + basePath, this.options);
             traversalStack.push(obj);
         }else{
             for (EntityInfo e : this.infoList) {
-                FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), generateOpts());
+                logger.info(this.vfsCredential.getUri() + basePath + e.getId());
+                FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), this.options);
                 traversalStack.push(fObject);
             }
         }
         for (int files = Integer.MAX_VALUE; files > 0 && !traversalStack.isEmpty(); --files) {
             FileObject curr = traversalStack.pop();
+            FileName fileName = curr.getName();
+            URI uri = URI.create(fileName.getURI());
+            logger.info(uri.toString());
             if (curr.getType() == FileType.FOLDER) {
                 traversalStack.addAll(Arrays.asList(curr.getChildren()));
                 //Add empty folders as well
                 if (curr.getChildren().length == 0) {
-                    String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                     EntityInfo fileInfo = new EntityInfo();
-                    fileInfo.setId(curr.getName().getBaseName());
-                    fileInfo.setPath(filePath);
+                    fileInfo.setId(fileName.getBaseName());
+                    fileInfo.setPath(uri.getPath());
                     filesToTransferList.add(fileInfo);
                 }
             } else if (curr.getType() == FileType.FILE) {
-                String filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
+
+                //filePath = curr.getPublicURIString().substring(this.vfsCredential.getUri().length()+basePath.length());
                 EntityInfo fileInfo = new EntityInfo();
                 fileInfo.setId(curr.getName().getBaseName());
-                fileInfo.setPath(filePath);
+                fileInfo.setPath(uri.getPath());
                 fileInfo.setSize(curr.getContent().getSize());
                 filesToTransferList.add(fileInfo);
             }

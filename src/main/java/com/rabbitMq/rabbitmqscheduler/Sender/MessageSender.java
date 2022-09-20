@@ -1,9 +1,13 @@
 package com.rabbitMq.rabbitmqscheduler.Sender;
 
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
+import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
+import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
+import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.core.AmqpTemplate;
+import org.springframework.amqp.core.DirectExchange;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,7 +17,13 @@ public class MessageSender {
     private static final Logger logger = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired
-    private RabbitTemplate rmqTemplate;
+    AmqpTemplate rmqTemplate;
+
+    @Autowired
+    DirectExchange directExchange;
+
+    @Value("${ods.rabbitmq.queue}")
+    private String queueName;
 
     @Value("${ods.rabbitmq.exchange}")
     private String exchange;
@@ -21,8 +31,26 @@ public class MessageSender {
     @Value("${ods.rabbitmq.routingkey}")
     private String routingkey;
 
-    public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
-        rmqTemplate.convertAndSend(exchange, routingkey, odsTransferRequest);
+    public void sendTransferRequest(TransferJobRequest odsTransferRequest, RequestFromODS.@NonNull Source source, RequestFromODS.@NonNull Destination destination) {
+        logger.debug(odsTransferRequest.toString());
+        boolean sourceVfs = odsTransferRequest.getSource().getType().equals(EndPointType.vfs);
+        boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
+        if (sourceVfs || destVfs) {
+            //for any vfs transfer where the user has their own transfer-service running on their metal.
+            String routingKey = "";
+            if (sourceVfs) {
+                routingKey = source.getCredId().toLowerCase();
+            }
+            if (destVfs) {
+                routingKey = destination.getCredId().toLowerCase();
+            }
+            logger.info("Vfs Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), routingKey);
+            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
+        } else {
+            //for all transfers that are using the ODS backend
+            logger.info("Ods Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), queueName);
+            rmqTemplate.convertAndSend(exchange, routingkey, odsTransferRequest);
+        }
         logger.info("Processed Job with ID: " + odsTransferRequest.getJobId());
     }
 

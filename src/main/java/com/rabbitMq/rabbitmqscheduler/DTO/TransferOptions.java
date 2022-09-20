@@ -24,7 +24,7 @@ public class TransferOptions {
         return TransferOptions.builder()
                 .compress(userTransferOptions.getCompress() != null && userTransferOptions.getCompress())
                 .concurrencyThreadCount(userTransferOptions.getConcurrencyThreadCount() == null? 1: userTransferOptions.getConcurrencyThreadCount())
-                .pipeSize(userTransferOptions.getPipeSize() == null ?1: userTransferOptions.getPipeSize())
+                .pipeSize(userTransferOptions.getPipeSize() == null ? 1: userTransferOptions.getPipeSize())
                 .parallelThreadCount(userTransferOptions.getParallelThreadCount() == null? 0 : userTransferOptions.getParallelThreadCount() )
                 .optimizer(userTransferOptions.getOptimizer() == null ? "" : userTransferOptions.getOptimizer())
                 .encrypt(userTransferOptions.getEncrypt() != null && userTransferOptions.getEncrypt())
