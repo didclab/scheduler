@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * This is the representaiton of a File/Folder or which is unlikely but a link
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

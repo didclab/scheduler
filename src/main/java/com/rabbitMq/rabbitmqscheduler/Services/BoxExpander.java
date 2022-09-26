@@ -4,6 +4,8 @@ import com.box.sdk.*;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,9 +14,10 @@ import java.util.Stack;
 import java.util.stream.Collectors;
 
 @Component
-public class BoxExpander implements FileExpander{
+public class BoxExpander extends DestinationChunkSize implements FileExpander {
 
     BoxAPIConnection connection;
+    Logger logger = LoggerFactory.getLogger(BoxExpander.class);
 
     @Override
     public void createClient(EndpointCredential credential) {
@@ -27,23 +30,27 @@ public class BoxExpander implements FileExpander{
         List<EntityInfo> transferFiles = new ArrayList<>();
         Stack<BoxFolder> travStack = new Stack<>();//this will only hold folders to traverse
         if(userSelectedResources.isEmpty()) return new ArrayList<>(); //we need to signal the cancellation of this transferjob request.
-        boolean isFile = false;
         for(EntityInfo selectedResource : userSelectedResources){
+            boolean isFile = false;
             try{
                 BoxFile temp = new BoxFile(this.connection, selectedResource.getId());
                 transferFiles.add(boxFileToEntityInfo(temp));
                 isFile = true;
-            }catch (BoxAPIException ignored){}
-            try{
-                if(!isFile){
+            }catch (BoxAPIException ignored){
+                logger.info("Tried to open {} as a file but it did not work", selectedResource.toString());
+                isFile = false;
+            }
+            if(!isFile){
+                try{
                     BoxFolder temp = new BoxFolder(this.connection, selectedResource.getId());
                     travStack.push(temp);
+                }catch (BoxAPIException ignored){
+                    logger.info("Tried to open {} as a folder but it did not work", selectedResource.toString());
                 }
-            }catch (BoxAPIException ignored){}
+            }
         }
         while(!travStack.isEmpty()){
             BoxFolder folder = travStack.pop();
-            System.out.println(folder.getInfo().getName());
             for(BoxItem.Info child : folder){
                 if (child instanceof BoxFile.Info) {
                     BoxFile.Info fileInfo = (BoxFile.Info) child;
@@ -59,25 +66,27 @@ public class BoxExpander implements FileExpander{
         return transferFiles;
     }
 
+    @Override
+    public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize) {
+        BoxFolder destinationUploadFolder = new BoxFolder(this.connection, basePath);
+        for(EntityInfo entityInfo : expandedFiles){
+            if(entityInfo.getSize() < 1024*1024*20){
+                entityInfo.setChunkSize(Math.toIntExact(entityInfo.getSize()));
+            }else{
+                BoxFileUploadSession.Info uploadSession = destinationUploadFolder.createUploadSession(entityInfo.getId(), entityInfo.getSize());
+                entityInfo.setChunkSize(uploadSession.getPartSize());
+            }
+        }
+        return expandedFiles;
+    }
+
+
     public EntityInfo boxFileToEntityInfo(BoxFile boxFile) {
         BoxFile.Info boxFileInfo = boxFile.getInfo();
         EntityInfo fileInfo = new EntityInfo();
         fileInfo.setId(boxFileInfo.getID());
-        fileInfo.setPath(boxFileInfo.getName());
+        fileInfo.setPath(boxFileInfo.getParent().getID());
         fileInfo.setSize(boxFileInfo.getSize());
-        List<BoxFolder.Info> pathInfo = boxFileInfo.getPathCollection();
-        String path = "";
-        if(pathInfo == null) {
-            path = "";
-        }else{
-            path = boxFileInfo.getPathCollection()
-                    .stream().map(info -> {
-                        String name = info.getName();
-                        return name+"/";
-                    }).collect(Collectors.joining());
-        }
-        fileInfo.setPath(path);
         return fileInfo;
     }
-
 }

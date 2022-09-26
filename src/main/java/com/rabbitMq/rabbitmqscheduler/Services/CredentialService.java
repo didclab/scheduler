@@ -33,6 +33,7 @@ public class CredentialService {
     }
 
     public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
+        logger.info("The OAuth type is: " + type + "UserId is: "+userId+" CredId is:"+credId);
         return restTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
     }
 }
