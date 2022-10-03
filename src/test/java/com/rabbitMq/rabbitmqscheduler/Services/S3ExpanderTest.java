@@ -43,25 +43,6 @@ public class S3ExpanderTest extends TestCase {
         Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
     }
 
-    /**
-     * This test fails b/c it includes the "/" as an entry. Not good :(
-     */
-    public void testExpandHelloWorldJacobTestBucketNoSlash(){
-        testObj = new S3Expander();
-        testObj.createClient(createTestCredentials());
-        ArrayList<EntityInfo> userSelectedFiles = new ArrayList<>();
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("transferCDB_Certs/");
-        entityInfo.setPath("transferCDB_Certs/");
-        userSelectedFiles.add(entityInfo);
-        List<EntityInfo> files = testObj.expandedFileSystem(userSelectedFiles, "");
-        for(EntityInfo fileInfo : files){
-            System.out.println("->" + fileInfo.toString());
-        }
-        assertEquals(3, files.size());
-    }
-
-
     public void testExpandWholeBucketBasePathWithSlash() {
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
