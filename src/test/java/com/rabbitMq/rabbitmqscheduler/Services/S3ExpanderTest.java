@@ -51,7 +51,60 @@ public class S3ExpanderTest extends TestCase {
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(selectedRes, "");
         Assert.isTrue(expandedBucketFiles.size() == 2, "The size of Users is 2 which it was not given out");
 
+        /**
+         ArrayList<EntityInfo> list = new ArrayList<>();
+         EntityInfo fileInfo = new EntityInfo();
+         fileInfo.setPath("100MB.zip");
+         fileInfo.setId("100MB.zip");
+         fileInfo.setSize(32);
+         list.add(fileInfo);
+         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "");
+         Assert.isTrue(expandedBucketFiles.size() == 1, "The size should be one");
+         **/
+
     }
+
+    public void testExpandHelloWorldJacobTestBucketSlash(){
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        ArrayList<EntityInfo> userSelectedFiles = new ArrayList<>();
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setId("helloworld/");
+        entityInfo.setPath("helloworld/");
+        userSelectedFiles.add(entityInfo);
+        List<EntityInfo> files = testObj.expandedFileSystem(userSelectedFiles, "/");
+        assertEquals(27, files.size());
+    }
+
+    /**
+     * This test fails b/c it includes the "/" as an entry. Not good :(
+     */
+    public void testExpandHelloWorldJacobTestBucketNoSlash(){
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        ArrayList<EntityInfo> userSelectedFiles = new ArrayList<>();
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setId("helloworld/");
+        entityInfo.setPath("helloworld/");
+        userSelectedFiles.add(entityInfo);
+        List<EntityInfo> files = testObj.expandedFileSystem(userSelectedFiles, "");
+        for(EntityInfo fileInfo : files){
+            System.out.println(fileInfo.toString());
+        }
+        assertEquals(27, files.size());
+    }
+
+
+    public void testExpandWholeBucketWithSlash() {
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
+        Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
+        for (int i = 0; i < expandedBucketFiles.size(); i++) {
+            System.out.println(expandedBucketFiles.get(i).toString());
+        }
+    }
+
 
     public void testOneFile(){
         testObj = new S3Expander();
@@ -67,16 +120,6 @@ public class S3ExpanderTest extends TestCase {
             System.out.println(expandedBucketFiles.get(i).toString());
         }
 
-    }
-
-    public void testExpandWholeBucketWithSlash() {
-        testObj = new S3Expander();
-        testObj.createClient(createTestCredentials());
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
-        Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
-        for(int i = 0; i < expandedBucketFiles.size(); i++){
-            System.out.println(expandedBucketFiles.get(i).toString());
-        }
     }
 
     public void testDestinationChunkSizeGoFile(){
