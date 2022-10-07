@@ -8,6 +8,12 @@ import org.springframework.util.Assert;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Future enhancements-
+ * - make bucket name configurable
+ * - avoid hardcoded file names in tests
+ * - for testing, add file and remove it
+ */
 public class S3ExpanderTest extends TestCase {
 
     S3Expander testObj;
@@ -35,12 +41,19 @@ public class S3ExpanderTest extends TestCase {
         testObj.createClient(createTestCredentials());
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
         Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
-        for(int i = 0; i < expandedBucketFiles.size(); i++){
-            System.out.println(expandedBucketFiles.get(i).toString());
-        }
     }
 
-    public void testOneFile(){
+    public void testExpandWholeBucketBasePathWithSlash() {
+        testObj = new S3Expander();
+        testObj.createClient(createTestCredentials());
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "/");
+        Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
+    }
+
+    /**
+     * Test absolute path in entity info
+     */
+    public void testOneFileNoBasePath(){
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
         ArrayList<EntityInfo> list = new ArrayList<>();
@@ -50,20 +63,21 @@ public class S3ExpanderTest extends TestCase {
         list.add(fileInfo);
         List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "");
         Assert.isTrue(expandedBucketFiles.size() == 1, "The size should be one");
-        for(int i = 0; i < expandedBucketFiles.size(); i++){
-            System.out.println(expandedBucketFiles.get(i).toString());
-        }
-
     }
 
-    public void testExpandWholeBucketWithSlash() {
+    /**
+     * Test relative path in entity info, basePath with prefix
+     */
+    public void testOneFileWithBasePath(){
         testObj = new S3Expander();
         testObj.createClient(createTestCredentials());
-        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(new ArrayList<>(), "");
-        Assert.isTrue(expandedBucketFiles.size() > 0, "The size was less than 0");
-        for(int i = 0; i < expandedBucketFiles.size(); i++){
-            System.out.println(expandedBucketFiles.get(i).toString());
-        }
+        ArrayList<EntityInfo> list = new ArrayList<>();
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setPath("ca.crt");
+        fileInfo.setId("ca.crt");
+        list.add(fileInfo);
+        List<EntityInfo> expandedBucketFiles = testObj.expandedFileSystem(list, "/transferCDB_Certs/");
+        Assert.isTrue(expandedBucketFiles.size() == 1, "The size should be one");
     }
 
     public void testDestinationChunkSizeGoFile(){
@@ -88,16 +102,15 @@ public class S3ExpanderTest extends TestCase {
         entityInfo.setId("transfer_service_secrets/");
         List<EntityInfo> folder = new ArrayList<>();
         folder.add(entityInfo);
-        List<EntityInfo> testList = testObj.expandedFileSystem(folder, "transfer_service_secrets/");
+        List<EntityInfo> testList = testObj.expandedFileSystem(folder, "/");
         for(EntityInfo fileInfo : testList){
             System.out.println(fileInfo.toString());
         }
-        Assert.isTrue(testList.size() >3);
+        Assert.isTrue(testList.size() > 3, "Should have more than 3 files");
     }
 
     public void testExpandTwoPrefix(){
         testObj = new S3Expander();
-        AccountEndpointCredential cred = createTestCredentials();
         testObj.createClient(createTestCredentials());
         EntityInfo folder1 = new EntityInfo();
         folder1.setPath("transfer_service_secrets/");
