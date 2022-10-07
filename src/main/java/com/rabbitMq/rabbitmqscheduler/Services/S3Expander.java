@@ -11,11 +11,10 @@ import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.EndpointCredential;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
-import org.w3c.dom.Entity;
 
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class S3Expander extends DestinationChunkSize implements FileExpander{
@@ -44,7 +43,7 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
             traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
         }
         for(EntityInfo userSelectedResource: userSelectedResources){
-            String absoluteResourcePath = basePath + userSelectedResource.getPath();
+            String absoluteResourcePath = Paths.get(basePath, userSelectedResource.getPath()).toString();
             //we have a folder/prefix for s3
             if (userSelectedResource.getPath().endsWith("/")){
                 ListObjectsV2Request req = createSkeletonPerResource(absoluteResourcePath);
