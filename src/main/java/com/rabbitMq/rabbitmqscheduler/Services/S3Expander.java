@@ -43,10 +43,9 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
             traversedFiles.addAll(convertV2ResultToEntityInfoList(result));
         }
         for(EntityInfo userSelectedResource: userSelectedResources){
-            String absoluteResourcePath = Paths.get(basePath, userSelectedResource.getPath()).toString();
             //we have a folder/prefix for s3
             if (userSelectedResource.getPath().endsWith("/")){
-                ListObjectsV2Request req = createSkeletonPerResource(absoluteResourcePath);
+                ListObjectsV2Request req = createSkeletonPerResource(userSelectedResource.getPath());
                 ListObjectsV2Result res = this.s3Client.listObjectsV2(req);
                 for(S3ObjectSummary obj : res.getObjectSummaries()){
                     if(obj.getKey().endsWith("/")) continue;
@@ -57,8 +56,8 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
                     traversedFiles.add(entityInfo);
                 }
                 // the case where the user selected a file
-            } else if(this.s3Client.doesObjectExist(this.regionAndBucket[1], absoluteResourcePath)){
-                ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],absoluteResourcePath);
+            } else if(this.s3Client.doesObjectExist(this.regionAndBucket[1], userSelectedResource.getPath())){
+                ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],userSelectedResource.getPath());
                 userSelectedResource.setSize(metadata.getContentLength());
                 traversedFiles.add(userSelectedResource);
             }
