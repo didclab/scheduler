@@ -43,11 +43,7 @@ public class FTPExpander extends DestinationChunkSize implements FileExpander {
     public void createClient(EndpointCredential credential) {
         this.vfsCredential = EndpointCredential.getAccountCredential(credential);
         StaticUserAuthenticator auth = new StaticUserAuthenticator(null, this.vfsCredential.getUsername(), this.vfsCredential.getSecret());
-        try {
-            DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
-        } catch (FileSystemException e) {
-            e.printStackTrace();
-        }
+        DefaultFileSystemConfigBuilder.getInstance().setUserAuthenticator(options, auth);
     }
 
     @SneakyThrows
