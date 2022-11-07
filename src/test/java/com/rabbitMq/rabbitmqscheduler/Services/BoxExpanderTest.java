@@ -1,19 +1,38 @@
 package com.rabbitMq.rabbitmqscheduler.Services;
 
+import com.box.sdk.BoxAPIConnection;
+import com.box.sdk.BoxFile;
+import com.box.sdk.BoxFolder;
+import com.box.sdk.BoxItem;
 import com.rabbitMq.rabbitmqscheduler.DTO.EntityInfo;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class BoxExpanderTest extends TestCase {
 
+    private List<String> folders = new ArrayList<>();
+    private List<String> files = new ArrayList<>();
+    private EntityInfo pretendFile;
     BoxExpander testObj;
+
+
+    @Before
+    public void setUp(){
+        folders = new ArrayList<>();
+        files = new ArrayList<>();
+        pretendFile = new EntityInfo();
+        populateRoot();
+    }
 
     public OAuthEndpointCredential oAuthEndpointCredentialWithDevToken(){
         OAuthEndpointCredential oAuthEndpointCredential = new OAuthEndpointCredential();
+        //add your access token for testing
+        //oAuthEndpointCredential.setToken(<token>);
         return oAuthEndpointCredential;
     }
 
@@ -23,7 +42,6 @@ public class BoxExpanderTest extends TestCase {
         List<EntityInfo> rootDirExpanded = testObj.expandedFileSystem(new ArrayList<>(), "");
         Assert.assertNotNull(rootDirExpanded);
         for(EntityInfo fileInfo: rootDirExpanded){
-            System.out.println(fileInfo.toString());
             Assert.assertNotNull(fileInfo);
             Assert.assertTrue(fileInfo.getSize() > 0);
             Assert.assertNotNull(fileInfo.getId());
@@ -39,7 +57,6 @@ public class BoxExpanderTest extends TestCase {
             Assert.assertNotNull(fileInfo);
             Assert.assertTrue(fileInfo.getSize() > 0);
             Assert.assertNotNull(fileInfo.getId());
-            System.out.println(fileInfo);
         }
     }
 
@@ -52,7 +69,6 @@ public class BoxExpanderTest extends TestCase {
             Assert.assertNotNull(fileInfo);
             Assert.assertTrue(fileInfo.getSize() > 0);
             Assert.assertNotNull(fileInfo.getId());
-            System.out.println(fileInfo);
         }
     }
 
@@ -65,7 +81,6 @@ public class BoxExpanderTest extends TestCase {
             Assert.assertNotNull(fileInfo);
             Assert.assertTrue(fileInfo.getSize() > 0);
             Assert.assertNotNull(fileInfo.getId());
-            System.out.println(fileInfo);
         }
     }
 
@@ -77,7 +92,7 @@ public class BoxExpanderTest extends TestCase {
     }
 
     public void testDestinationChunkSizeWithChunkSizeWithOneFile() {
-        List<EntityInfo> expandedFiles = selectOnePretendFile();
+        List<EntityInfo> expandedFiles = List.of(pretendFile);
         testObj = new BoxExpander();
         testObj.createClient(oAuthEndpointCredentialWithDevToken());
         Assert.assertEquals(testObj.destinationChunkSize(expandedFiles, "", 64000), expandedFiles);
@@ -86,26 +101,24 @@ public class BoxExpanderTest extends TestCase {
     public void testOneDir(){
         testObj = new BoxExpander();
         testObj.createClient(oAuthEndpointCredentialWithDevToken());
-        List<EntityInfo> fileInfos = testObj.expandedFileSystem(this.testOneDirPoo(), "");
-        Assert.assertEquals(1, fileInfos.size());
-        Assert.assertEquals("847290704115", fileInfos.get(0).getId());
-        System.out.println(fileInfos.get(0).toString());
+        List<EntityInfo> input = this.testOneDirPoo();
+        List<EntityInfo> fileInfos = testObj.expandedFileSystem(input, "");
+        Assert.assertNotNull(fileInfos);
     }
 
     public void testDestinationChunkSizeBox(){
-        List<EntityInfo> testList = selectOnePretendFile();
+        List<EntityInfo> testList = List.of(pretendFile);
         int chunkSize = 100000;
         testObj = new BoxExpander();
         testObj.createClient(oAuthEndpointCredentialWithDevToken());
         testList = testObj.destinationChunkSize(testList, "0", chunkSize);
         Assert.assertTrue("The original chunkSize is not right for uploading to box",testList.get(0).getSize() != chunkSize);
-        System.out.println(testList.get(0).getChunkSize());
     }
 
     public List<EntityInfo> testOneDirPoo(){
         List<EntityInfo> arrayList = new ArrayList<>();
         EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("154484914681");
+        entityInfo.setId(folders.get(0));
 //        entityInfo.setPath("154484914681");
         arrayList.add(entityInfo);
         return arrayList;
@@ -123,53 +136,68 @@ public class BoxExpanderTest extends TestCase {
 
     public ArrayList<EntityInfo> createTwoDirExpansion(){
         ArrayList<EntityInfo> list = new ArrayList<>();
-
         EntityInfo nextInfoTwo = new EntityInfo();
         nextInfoTwo.setPath("");
-        nextInfoTwo.setId("138759045640");
+        nextInfoTwo.setId(folders.get(0));
         nextInfoTwo.setSize(0);
         list.add(nextInfoTwo);
-
-        EntityInfo nextInfo = new EntityInfo();
-        nextInfo.setPath("");
-        nextInfo.setId("103134722568");
-        nextInfo.setSize(0);
-        list.add(nextInfo);
+        if(folders.size() > 1) {
+            EntityInfo nextInfo = new EntityInfo();
+            nextInfo.setPath("");
+            nextInfoTwo.setId(folders.get(1));
+            nextInfo.setSize(0);
+            list.add(nextInfo);
+        }
         return list;
     }
 
     public ArrayList<EntityInfo> expandTwoDirWithOtherFiles(){
         ArrayList<EntityInfo> list = new ArrayList<>();
-
         EntityInfo nextInfoTwo = new EntityInfo();
         nextInfoTwo.setPath("");
-        nextInfoTwo.setId("138758736572");
+        nextInfoTwo.setId(folders.get(0));
         nextInfoTwo.setSize(0);
         list.add(nextInfoTwo);
 
         EntityInfo nextInfo = new EntityInfo();
         nextInfo.setPath("");
-        nextInfo.setId("138758865195");
+        nextInfo.setId(files.get(0));
         nextInfo.setSize(0);
         list.add(nextInfo);
 
-        EntityInfo file = new EntityInfo();
-        nextInfo.setPath("");
-        nextInfo.setId("819408674349");
-        nextInfo.setSize(0);
-        list.add(file);
+        if(folders.size() > 1) {
+            EntityInfo file = new EntityInfo();
+            nextInfo.setPath("");
+            nextInfo.setId(folders.get(1));
+            nextInfo.setSize(0);
+            list.add(file);
+        }
         return list;
     }
 
-    public ArrayList<EntityInfo> selectOnePretendFile(){
-        ArrayList<EntityInfo> fileInfo = new ArrayList<>();
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("819400248751");
-        entityInfo.setPath("0");
-        entityInfo.setSize(411944960);
-        fileInfo.add(entityInfo);
-        return fileInfo;
-    }
+    /**
+     * populate all files and folders in the root
+     */
+    private void populateRoot(){
+        boolean isPretendSet = false;
+        BoxAPIConnection connection = new BoxAPIConnection(oAuthEndpointCredentialWithDevToken().getToken());
+        BoxFolder temp = new BoxFolder(connection, "0");
+        for(BoxItem.Info child : temp){
+            if(child instanceof BoxFolder.Info){
+                BoxFolder.Info folder = (BoxFolder.Info) child;
+                folders.add(folder.getID());
+            }else{
+                BoxFile.Info file = (BoxFile.Info) child;
+                files.add(file.getID());
+                if(!isPretendSet) {
+                    pretendFile.setId(file.getID());
+                    pretendFile.setSize(file.getSize());
+                    isPretendSet = true;
+                }
 
+            }
+        }
+
+    }
 
 }
