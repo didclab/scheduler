@@ -14,6 +14,7 @@ public class HttpExpanderTest extends TestCase {
     public AccountEndpointCredential credential(){
         AccountEndpointCredential cred = new AccountEndpointCredential();
         cred.setAccountId("testHttpServer");
+        cred.setUsername("cc");
         cred.setUri("http://129.114.109.132:80");
         return cred;
     }
@@ -76,10 +77,25 @@ public class HttpExpanderTest extends TestCase {
         Assert.assertEquals(2, fInfo.size());
     }
 
+    public void testOneFileExpansion(){
+        testObj = new HttpExpander();
+        testObj.createClient(this.credential());
+        ArrayList<EntityInfo> selectedFolders = new ArrayList<>();
+        selectedFolders.add(singleFileInfo());
+        List<EntityInfo> fInfo = testObj.expandedFileSystem(selectedFolders, "");
+        for(EntityInfo fileInfo : fInfo){
+            if(fileInfo.getId().equals("monty-1.dmg")){
+                Assert.assertEquals(1073741824L, fileInfo.getSize());
+            }
+            System.out.println(fileInfo.toString());
+        }
+        Assert.assertEquals(1, fInfo.size());
+    }
+
     public EntityInfo parallelFilesDir(){
         EntityInfo fileInfo = new EntityInfo();
         fileInfo.setId("parallelFiles/");
-        fileInfo.setPath("/parallelFiles/");
+        fileInfo.setPath("parallelFiles/");
         return fileInfo;
     }
 
@@ -93,7 +109,14 @@ public class HttpExpanderTest extends TestCase {
     public EntityInfo helloWorldTwoFiles(){
         EntityInfo fileInfo = new EntityInfo();
         fileInfo.setId("helloWorld/");
-        fileInfo.setPath("/helloWorld/");
+        fileInfo.setPath("helloWorld/");
+        return fileInfo;
+    }
+
+    public EntityInfo singleFileInfo(){
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("monty-1.dmg");
+        fileInfo.setPath("monty-1.dmg");
         return fileInfo;
     }
 }

@@ -15,11 +15,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -41,8 +45,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
     public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
         List<EntityInfo> filesToSend = new ArrayList<>();
         Stack<Element> directoriesToTraverse = new Stack<>();
-        //traverse user selected folders or files
-        if(basePath.isEmpty()) basePath = "/";
+        if (basePath.isEmpty()) basePath = "/";
         if (userSelectedResources.isEmpty()) { //we move the whole damn server
             logger.info(this.credential.getUri() + basePath);
             Document doc = Jsoup.connect(this.credential.getUri() + basePath).get();
@@ -56,15 +59,22 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             }
         } else { //move only files/folders the user selected
             for (EntityInfo selectedFiles : userSelectedResources) {
-                logger.info(this.credential.getUri() + basePath +selectedFiles.getPath());
-                Document doc = Jsoup.connect(this.credential.getUri() + basePath +selectedFiles.getPath()).get();
-                Elements links = doc.select("body a");
-                for (Element elem : links) {
-                    if (elem.text().endsWith("/")) { //directory to expand
-                        directoriesToTraverse.push(elem);
-                    } else { //we have a file
-                        filesToSend.add(fromElement(elem));
+                logger.info(this.credential.getUri() + basePath + selectedFiles.getPath());
+                //we have a folder to transfer
+                if(selectedFiles.getPath().endsWith("/")){
+                    Document doc = Jsoup.connect(this.credential.getUri() + basePath + selectedFiles.getPath())
+                            .ignoreContentType(true)
+                            .get();
+                    Elements links = doc.select("body a");
+                    for (Element elem : links) {
+                        if (elem.text().endsWith("/")) { //directory to expand
+                            directoriesToTraverse.push(elem);
+                        } else { //we have a file
+                            filesToSend.add(fromElement(elem));
+                        }
                     }
+                }else{
+                    filesToSend.add(this.fileToInfo(this.credential.getUri() + basePath + selectedFiles.getPath()));
                 }
             }
         }
@@ -74,8 +84,8 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             if (directory.text().contains("..") || directory.text().contains(".")) {
                 continue;
             }
-            logger.info(directory.baseUri() + "/" +directory.text());
-            Document doc = Jsoup.connect(directory.baseUri() + "/" +directory.text()).get();
+            logger.info(directory.baseUri() + "/" + directory.text());
+            Document doc = Jsoup.connect(directory.baseUri() + "/" + directory.text()).get();
             Elements links = doc.select("body a");
             for (Element elem : links) {
                 if (elem.text().endsWith("/")) { //directory to expand
@@ -96,6 +106,20 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         logger.info("file size={}", fileSize);
         logger.info("File Path: {}", url.getPath());
         fileInfo.setId(elem.text());
+        fileInfo.setSize(fileSize);
+        fileInfo.setPath(url.getPath());
+        return fileInfo;
+    }
+
+    public EntityInfo fileToInfo(String strUrl) throws IOException {
+        EntityInfo fileInfo = new EntityInfo();
+        URL url = new URL(strUrl);
+        URLConnection conn = url.openConnection();
+        long fileSize = conn.getContentLengthLong();
+        logger.info("File Name:{}", conn.getURL().getFile());
+        logger.info("file size={}", fileSize);
+        logger.info("File Path: {}", url.getPath());
+        fileInfo.setId(conn.getURL().getFile());
         fileInfo.setSize(fileSize);
         fileInfo.setPath(url.getPath());
         return fileInfo;
