@@ -33,6 +33,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
     @Override
     public void createClient(EndpointCredential credential) {
         this.credential = EndpointCredential.getAccountCredential(credential);
+        logger.info(this.credential.toString());
     }
 
     @SneakyThrows
@@ -43,6 +44,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         //traverse user selected folders or files
         if(basePath.isEmpty()) basePath = "/";
         if (userSelectedResources.isEmpty()) { //we move the whole damn server
+            logger.info(this.credential.getUri() + basePath);
             Document doc = Jsoup.connect(this.credential.getUri() + basePath).get();
             Elements links = doc.select("body a");
             for (Element elem : links) {
@@ -54,6 +56,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             }
         } else { //move only files/folders the user selected
             for (EntityInfo selectedFiles : userSelectedResources) {
+                logger.info(this.credential.getUri() + basePath +selectedFiles.getPath());
                 Document doc = Jsoup.connect(this.credential.getUri() + basePath +selectedFiles.getPath()).get();
                 Elements links = doc.select("body a");
                 for (Element elem : links) {
@@ -71,6 +74,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             if (directory.text().contains("..") || directory.text().contains(".")) {
                 continue;
             }
+            logger.info(directory.baseUri() + "/" +directory.text());
             Document doc = Jsoup.connect(directory.baseUri() + "/" +directory.text()).get();
             Elements links = doc.select("body a");
             for (Element elem : links) {
