@@ -54,7 +54,7 @@ public class RequestModifier {
                 return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case http:
                 httpExpander.createClient(source.getVfsSourceCredential());
-                return httpExpander.expandedFileSystem(source.getInfoList(), source.getParentInfo().getPath());
+                return httpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
             case box:
                 boxExpander.createClient(source.getOauthSourceCredential());
                 return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
