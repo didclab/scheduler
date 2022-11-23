@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 @Component
 public class BoxExpander extends DestinationChunkSize implements FileExpander {
@@ -85,8 +84,13 @@ public class BoxExpander extends DestinationChunkSize implements FileExpander {
         BoxFile.Info boxFileInfo = boxFile.getInfo();
         EntityInfo fileInfo = new EntityInfo();
         fileInfo.setId(boxFileInfo.getID());
+        fileInfo.setName(boxFileInfo.getName());
+        //todo - should this be entire path or just parent id?
         fileInfo.setPath(boxFileInfo.getParent().getID());
         fileInfo.setSize(boxFileInfo.getSize());
+        //todo - check if etag or sha1
+        fileInfo.setChecksum(boxFileInfo.getSha1());
+        fileInfo.setParent(boxFileInfo.getParent().getID());
         return fileInfo;
     }
 }
