@@ -1,6 +1,7 @@
 package com.rabbitMq.rabbitmqscheduler.Sender;
 
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
+import com.rabbitMq.rabbitmqscheduler.DTO.TransferParams;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import lombok.NonNull;
@@ -52,6 +53,16 @@ public class MessageSender {
             rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
         }
         logger.info("Processed Job with ID: " + odsTransferRequest.getJobId());
+    }
+
+    /**
+     * The Transfer params to send using the routingKey
+     * @param transferParams
+     * @param routingKey
+     */
+    public void sendApplicationParams(TransferParams transferParams, String routingKey) {
+        logger.info("Application Params: {} going to {}", transferParams, routingKey);
+        this.rmqTemplate.convertAndSend(routingKey, transferParams);
     }
 
 }
