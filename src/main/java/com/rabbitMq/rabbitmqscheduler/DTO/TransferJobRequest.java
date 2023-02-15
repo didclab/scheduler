@@ -19,7 +19,6 @@ import java.util.List;
 @Getter
 //@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id", scope = TransferJobRequest.class)
 public class TransferJobRequest {
-    private String jobId;
     private String ownerId;
     private int priority;
     private int chunkSize;

@@ -108,7 +108,6 @@ public class RequestModifier {
     public TransferJobRequest createRequest(RequestFromODS odsTransferRequest) {
         logger.info(odsTransferRequest.toString());
         TransferJobRequest transferJobRequest = new TransferJobRequest();
-        transferJobRequest.setJobId("1");//We will neeed to have some kind of ID system so that we always provide unique keys, an easy way is to just use the current nano time plus the total number of jobs processed.
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
         transferJobRequest.setPriority(1);//need some way of creating priority depending on factors. Memberyship type? Urgency of transfer, prob need create these groups
