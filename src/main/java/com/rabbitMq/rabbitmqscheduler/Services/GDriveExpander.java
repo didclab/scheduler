@@ -26,6 +26,7 @@ import java.util.Stack;
 @Service
 public class GDriveExpander extends DestinationChunkSize implements FileExpander{
 
+    Logger logger = LoggerFactory.getLogger(GDriveExpander.class);
     @Value("${gdrive.client.id}")
     private String gDriveClientId;
 
@@ -35,6 +36,7 @@ public class GDriveExpander extends DestinationChunkSize implements FileExpander
     @Value("${gdrive.appname}")
     private String gdriveAppName;
 
+    private final String REQUEST_FILE_FIELDS = "id, name, size, mimeType, modifiedTime, md5Checksum, trashed, parents";
     private Drive client;
 
     @Override
@@ -59,25 +61,29 @@ public class GDriveExpander extends DestinationChunkSize implements FileExpander
     public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
         Stack<File> fileListStack = new Stack<>();
         List<EntityInfo> fileInfoList = new ArrayList<>();
-        if(userSelectedResources.isEmpty()){
-            googleDriveLister(fileListStack, fileInfoList, "", "");
-        }else{
             for(EntityInfo fileInfo : userSelectedResources){
                 String fileQuery = "'" + fileInfo.getId() + "' in parents and trashed=false";
-                googleDriveLister(fileListStack, fileInfoList, fileQuery, fileInfo.getId());
-            }
+                EntityInfo info = getMetadataForfile(fileInfo.getId());
+                if(info==null){
+                    fileInfoList.addAll(googleDriveLister(fileListStack, fileQuery, fileInfo.getId()));
+                } else{
+                    fileInfoList.add(info);
+                }
         }
+
         while(!fileListStack.isEmpty()){
             File file = fileListStack.pop();
             String fileQuery = "'" + file.getId() + "' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed=false";
-            googleDriveLister(fileListStack, fileInfoList, fileQuery, file.getId());
+            googleDriveLister(fileListStack, fileQuery, file.getId());
         }
         return fileInfoList;
     }
 
-    private void googleDriveLister(Stack<File> fileListStack, List<EntityInfo> fileInfoList, String fileQuery, String parentFolderId) {
+    private List<EntityInfo> googleDriveLister(Stack<File> fileListStack, String fileQuery, String folderId) {
         FileList fileList;
         String pageToken = "";
+
+        List<EntityInfo> folderFileList = new ArrayList<>();
         try {
             do {
                 fileList = this.client.files().list()
@@ -85,28 +91,46 @@ public class GDriveExpander extends DestinationChunkSize implements FileExpander
                         .setFields("nextPageToken, files(id, name, parents, size, mimeType)")
                         .setPageToken(pageToken)
                         .execute();
+
                 for(File file : fileList.getFiles()){
-                    if(file.getId().equals(parentFolderId)){
+                    if(file.getId().equals(folderId)){//the folder that u query appears in the result
                         continue;
                     }
                     if(file.getMimeType().equals("application/vnd.google-apps.folder")){
                         fileListStack.add(file);
                     }else{
-                        fileInfoList.add(googleFileToEntityInfo(file));
+                        folderFileList.add(getMetadataForfile(file.getId()));
                     }
                 }
                 pageToken = fileList.getNextPageToken();
             } while (pageToken != null);
         } catch (IOException e) {
+            logger.error("Error listing files from Google drive",e);
+        }
+        return folderFileList;
+    }
+
+    public EntityInfo getMetadataForfile(String fileId){
+        try {
+            File file = this.client.files().get(fileId)
+                    .setFields(REQUEST_FILE_FIELDS)
+                    .execute();
+            return googleFileToEntityInfo(file);
+        } catch(IOException e){
             e.printStackTrace();
         }
+       return null;
     }
 
     private EntityInfo googleFileToEntityInfo(File googleFile){
+        if(googleFile.getId() == null || googleFile.getParents() == null || googleFile.getSize() == null || googleFile.getMd5Checksum() == null){
+            return null;
+        }
         EntityInfo entityInfo = new EntityInfo();
         entityInfo.setId(googleFile.getId());
         entityInfo.setSize(googleFile.getSize());
         entityInfo.setPath(String.valueOf(googleFile.getParents()));
+        entityInfo.setChecksum(googleFile.getMd5Checksum());
         return entityInfo;
     }
 }
