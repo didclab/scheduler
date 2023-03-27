@@ -1,5 +1,6 @@
 package com.rabbitMq.rabbitmqscheduler.Controller;
 
+import com.rabbitMq.rabbitmqscheduler.DTO.StopRequest;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobResponse;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
@@ -30,4 +31,11 @@ public class JobController {
         response.setMessage("Job Submitted");
         return response;
     }
+    @PostMapping(value = "/stopJob")
+    public Boolean stopJob(@RequestBody StopRequest stopRequest) {
+        logger.info("Received request to stop job with id: " + stopRequest.toString());
+        messageSender.sendStopJobRequest(stopRequest);
+        return true;
+    }
+
 }

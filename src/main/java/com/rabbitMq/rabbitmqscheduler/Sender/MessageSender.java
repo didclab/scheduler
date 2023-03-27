@@ -1,5 +1,7 @@
 package com.rabbitMq.rabbitmqscheduler.Sender;
 
+import com.rabbitMq.rabbitmqscheduler.DTO.StopRequest;
+import com.rabbitMq.rabbitmqscheduler.DTO.StopResponses;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferJobRequest;
 import com.rabbitMq.rabbitmqscheduler.DTO.TransferParams;
 import com.rabbitMq.rabbitmqscheduler.DTO.transferFromODS.RequestFromODS;
@@ -7,6 +9,7 @@ import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
 import lombok.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.amqp.AmqpException;
 import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +57,27 @@ public class MessageSender {
         }
         logger.info("Processed Job: {}", odsTransferRequest);
     }
+    public StopResponses sendStopJobRequest(StopRequest stopRequest) {
+        String errorMessage = null;
+        boolean success = true;
+
+        if (stopRequest.getTransferNodeName() == null || stopRequest.getTransferNodeName().isEmpty()) {
+            errorMessage = "Failed to send stop job request. Transfer node name" + stopRequest.getTransferNodeName() + " is not provided.";
+            success = false;
+        } else {
+            try {
+                rmqTemplate.convertAndSend(exchange, stopRequest.getTransferNodeName(), stopRequest.getJobId());
+            } catch (AmqpException e) {
+                errorMessage = "Error occurred while sending stop job request: " + e.getMessage();
+                success = false;
+            }
+        }
+
+        return new StopResponses(success, errorMessage);
+
+
+    }
+
 
     /**
      * The Transfer params to send using the routingKey
