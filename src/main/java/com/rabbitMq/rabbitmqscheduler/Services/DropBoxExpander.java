@@ -30,7 +30,7 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
     }
 
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String parentPath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String parentPath, boolean overwrite) {
         Stack<Metadata> traversalQueue = new Stack<>();
         List<EntityInfo> expandedFiles = new ArrayList<>();
         if (parentPath == null || parentPath.isEmpty()) parentPath = "";
@@ -39,6 +39,9 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
             List<Metadata> resources = listOp(parentPath);
             for (Metadata resource : resources) {
                 if (resource instanceof FileMetadata) {
+                    if (!overwrite && destinationFileExists(resource.getName(),parentPath)) {
+                        continue; // Skip this file
+                    }
                     expandedFiles.add(metaDataToFileInfo((FileMetadata) resource));
                 } else if (resource instanceof FolderMetadata) {
                     traversalQueue.push(resource);
@@ -49,6 +52,9 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
                 List<Metadata> dropBoxFiles = listOp(fileInfo.getPath());
                 dropBoxFiles.forEach(metadata -> {
                     if (metadata instanceof FileMetadata) {
+                        if (!overwrite && destinationFileExists(metadata.getName(),fileInfo.getPath())) {
+                            return; // Skip this file
+                        }
                         expandedFiles.add(metaDataToFileInfo((FileMetadata) metadata));
                     } else if (metadata instanceof FolderMetadata) {
                         traversalQueue.push(metadata);
@@ -61,6 +67,9 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
             List<Metadata> folderList = listOp(folderMetadata.getPathLower());
             for (Metadata res : folderList) {
                 if (res instanceof FileMetadata) {
+                    if (!overwrite && destinationFileExists(res.getName(),parentPath)) {
+                        continue; // Skip this file
+                    }
                     expandedFiles.add(metaDataToFileInfo((FileMetadata) res));
                 } else if (res instanceof FolderMetadata) {
                     traversalQueue.push(res);
@@ -68,6 +77,15 @@ public class DropBoxExpander extends DestinationChunkSize implements FileExpande
             }
         }
         return expandedFiles;
+    }
+    private boolean destinationFileExists(String fileName, String destinationPath) {
+        List<Metadata> destinationFiles = listOp(destinationPath);
+        for (Metadata file : destinationFiles) {
+            if (file.getName().equals(fileName) && file instanceof FileMetadata) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public EntityInfo metaDataToFileInfo(FileMetadata file) {

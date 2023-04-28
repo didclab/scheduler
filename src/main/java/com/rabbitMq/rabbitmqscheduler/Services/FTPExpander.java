@@ -52,7 +52,7 @@ public class FTPExpander extends DestinationChunkSize implements FileExpander {
 
     @SneakyThrows
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         this.infoList = userSelectedResources;
         List<EntityInfo> filesToTransferList = new LinkedList<>();
         Stack<FileObject> traversalStack = new Stack<>();
@@ -66,6 +66,15 @@ public class FTPExpander extends DestinationChunkSize implements FileExpander {
                 logger.info(this.vfsCredential.getUri() + basePath + e.getId());
                 FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), this.options);
                 traversalStack.push(fObject);
+            }
+        }
+        // If overwrite flag is not set, delete all files on the destination
+        if (!overwrite) {
+            for (EntityInfo e : this.infoList) {
+                FileObject fObject = fsm.resolveFile(this.vfsCredential.getUri() + basePath + e.getId(), this.options);
+                if (fObject.exists() && fObject.getType() == FileType.FILE) {
+                    fObject.delete();
+                }
             }
         }
         for (int files = Integer.MAX_VALUE; files > 0 && !traversalStack.isEmpty(); --files) {

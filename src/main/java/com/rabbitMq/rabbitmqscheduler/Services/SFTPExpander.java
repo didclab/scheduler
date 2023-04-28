@@ -62,7 +62,7 @@ public class SFTPExpander extends DestinationChunkSize implements FileExpander {
 
     @SneakyThrows
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         //if(!basePath.endsWith("/")) basePath +="/";
         this.infoList = userSelectedResources;
         List<EntityInfo> filesToTransferList = new LinkedList<>();
@@ -106,6 +106,9 @@ public class SFTPExpander extends DestinationChunkSize implements FileExpander {
                     fileInfo.setId(curr.getFilename());
                     fileInfo.setSize(curr.getAttrs().getSize());
                     fileInfo.setPath(fullPath);
+                    if (!overwrite && infoList.contains(fileInfo)) {
+                        infoList.remove(fileInfo);
+                    }
                 } else {
                     for (ChannelSftp.LsEntry f : children) {
                         entryToFullPath.put(f, fullPath + "/" + f.getFilename());
@@ -117,8 +120,15 @@ public class SFTPExpander extends DestinationChunkSize implements FileExpander {
                 fileInfo.setPath(fullPath);
                 fileInfo.setId(curr.getFilename());
                 fileInfo.setSize(curr.getAttrs().getSize());
-                filesToTransferList.add(fileInfo);
+                if (!overwrite && infoList.contains(fileInfo)) {
+                    infoList.remove(fileInfo);
+                } else {
+                    filesToTransferList.add(fileInfo);
+                }
             }
+        }
+        if (overwrite) {
+            filesToTransferList.addAll(infoList);
         }
         return filesToTransferList;
     }

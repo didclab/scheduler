@@ -39,33 +39,33 @@ public class RequestModifier {
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
     Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
 
-    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources) {
+    public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources, boolean overwrite) {
         logger.info("The info list in select and expand is \n" + selectedResources.toString());
         switch (source.getType()) {
             case ftp:
                 ftpExpander.createClient(source.getVfsSourceCredential());
-                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return ftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath(), overwrite);
             case s3:
                 s3Expander.createClient(source.getVfsSourceCredential());
-                return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return s3Expander.expandedFileSystem(selectedResources, source.getParentInfo().getPath(), overwrite);
             case sftp:
             case scp:
                 sftpExpander.createClient(source.getVfsSourceCredential());
-                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return sftpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath(), overwrite);
             case http:
                 httpExpander.createClient(source.getVfsSourceCredential());
-                return httpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath());
+                return httpExpander.expandedFileSystem(selectedResources, source.getParentInfo().getPath(), overwrite);
             case box:
                 boxExpander.createClient(source.getOauthSourceCredential());
-                return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
+                return boxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId(), overwrite);
             case dropbox:
                 dropBoxExpander.createClient(source.getOauthSourceCredential());
-                return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
+                return dropBoxExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId(), overwrite);
             case vfs:
                 return selectedResources;
             case gdrive:
                 gDriveExpander.createClient(source.getOauthSourceCredential());
-                return gDriveExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId());
+                return gDriveExpander.expandedFileSystem(selectedResources, source.getParentInfo().getId(), overwrite);
 
         }
         return null;
@@ -136,7 +136,7 @@ public class RequestModifier {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }
-        List<EntityInfo> expandedFiles = this.selectAndExpand(s, odsTransferRequest.getSource().getInfoList());
+        List<EntityInfo> expandedFiles = this.selectAndExpand(s, odsTransferRequest.getSource().getInfoList(), odsTransferRequest.getOptions().isOverwrite());
         expandedFiles = this.checkDestinationChunkSize(expandedFiles, d, odsTransferRequest.getOptions().getChunkSize());
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);

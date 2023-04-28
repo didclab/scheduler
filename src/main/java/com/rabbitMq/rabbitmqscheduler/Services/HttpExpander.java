@@ -42,7 +42,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
 
     @SneakyThrows
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         List<EntityInfo> filesToSend = new ArrayList<>();
         Stack<Element> directoriesToTraverse = new Stack<>();
         if (basePath.isEmpty()) basePath = "/";
@@ -54,7 +54,20 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
                 if (elem.text().endsWith("/")) { //directory to expand
                     directoriesToTraverse.push(elem);
                 } else { //we have a file
-                    filesToSend.add(fromElement(elem));
+                    EntityInfo fileInfo = fromElement(elem);
+                    boolean shouldTransfer = true;
+                    if (!overwrite) {
+                        for (EntityInfo existingFile : filesToSend) {
+                            if (existingFile.getName().equals(fileInfo.getName()) &&
+                                    existingFile.getPath().equals(fileInfo.getPath())) {
+                                shouldTransfer = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldTransfer) {
+                        filesToSend.add(fileInfo);
+                    }
                 }
             }
         } else { //move only files/folders the user selected
@@ -70,11 +83,37 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
                         if (elem.text().endsWith("/")) { //directory to expand
                             directoriesToTraverse.push(elem);
                         } else { //we have a file
-                            filesToSend.add(fromElement(elem));
+                            EntityInfo entityInfo = fromElement(elem);
+                            boolean shouldTransfer = true;
+                            if (!overwrite) {
+                                for (EntityInfo existingFile : filesToSend) {
+                                    if (existingFile.getName().equals(entityInfo.getName()) &&
+                                            existingFile.getPath().equals(entityInfo.getPath())) {
+                                        shouldTransfer = false;
+                                        break;
+                                    }
+                                }
+                            }
+                            if (shouldTransfer) {
+                                filesToSend.add(entityInfo);
+                            }
                         }
                     }
                 }else{
-                    filesToSend.add(this.fileToInfo(this.credential.getUri() + basePath + selectedFiles.getPath()));
+                    EntityInfo entityInfo = this.fileToInfo(this.credential.getUri() + basePath + selectedFiles.getPath());
+                    boolean shouldTransfer = true;
+                    if (!overwrite) {
+                        for (EntityInfo existingFile : filesToSend) {
+                            if (existingFile.getName().equals(entityInfo.getName()) &&
+                                    existingFile.getPath().equals(entityInfo.getPath())) {
+                                shouldTransfer = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldTransfer) {
+                        filesToSend.add(entityInfo);
+                    }
                 }
             }
         }
@@ -91,7 +130,20 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
                 if (elem.text().endsWith("/")) { //directory to expand
                     directoriesToTraverse.push(elem);
                 } else { //we have a file
-                    filesToSend.add(fromElement(elem));
+                    EntityInfo fileInfo = fromElement(elem);
+                    boolean shouldTransfer = true;
+                    if (!overwrite) {
+                        for (EntityInfo existingFile : filesToSend) {
+                            if (existingFile.getName().equals(fileInfo.getName()) &&
+                                    existingFile.getPath().equals(fileInfo.getPath())) {
+                                shouldTransfer = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldTransfer) {
+                        filesToSend.add(fileInfo);
+                    }
                 }
             }
         }
