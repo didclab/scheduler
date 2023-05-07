@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: RabbitmqSchedulerApplication
+  cloud:
+    vault:
+      scheme: https
+      host: 'vault.onedatashare.org'
+      port: 443
+      token: hvs.CAESIG8sR1dwAhlK0kGX_DY4hctarJKEVQUI54rSwCNGoT1cGh4KHGh2cy5waTRyTzRodHM4clhvMHM3Q1ZVdkxHNDE
+      authentication: token
+      kv:
+        enabled: true
+        profile-separator: '/'
+        default-context : RabbitmqSchedulerApplication
+        backend: secret
+        profiles: application_properties
