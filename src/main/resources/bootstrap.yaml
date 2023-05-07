@@ -6,7 +6,7 @@ spring:
       scheme: https
       host: 'vault.onedatashare.org'
       port: 443
-      token: hvs.CAESIG8sR1dwAhlK0kGX_DY4hctarJKEVQUI54rSwCNGoT1cGh4KHGh2cy5waTRyTzRodHM4clhvMHM3Q1ZVdkxHNDE
+      token: <place_token_here>
       authentication: token
       kv:
         enabled: true
