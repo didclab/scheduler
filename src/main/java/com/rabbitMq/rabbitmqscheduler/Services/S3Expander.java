@@ -34,7 +34,7 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
     }
 
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         List<EntityInfo> traversedFiles = new LinkedList<>();
         //trim leading forward slashes from base path (s3 doesn't recognise it as root)
         basePath = StringUtils.stripStart(basePath, "/");
@@ -53,13 +53,37 @@ public class S3Expander extends DestinationChunkSize implements FileExpander{
                     entityInfo.setId(obj.getKey());
                     entityInfo.setPath(obj.getKey());
                     entityInfo.setSize(obj.getSize());
-                    traversedFiles.add(entityInfo);
+                    boolean shouldTransfer = true;
+                    if (!overwrite) {
+                        for (EntityInfo existingFile : traversedFiles) {
+                            if (existingFile.getName().equals(entityInfo.getName()) &&
+                                    existingFile.getPath().equals(entityInfo.getPath())) {
+                                shouldTransfer = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldTransfer) {
+                        traversedFiles.add(entityInfo);
+                    }
                 }
                 // the case where the user selected a file
             } else if(this.s3Client.doesObjectExist(this.regionAndBucket[1], userSelectedResource.getPath())){
                 ObjectMetadata metadata = this.s3Client.getObjectMetadata(this.regionAndBucket[1],userSelectedResource.getPath());
                 userSelectedResource.setSize(metadata.getContentLength());
-                traversedFiles.add(userSelectedResource);
+                boolean shouldTransfer = true;
+                if (!overwrite) {
+                    for (EntityInfo existingFile : traversedFiles) {
+                        if (existingFile.getName().equals(userSelectedResource.getName()) &&
+                                existingFile.getPath().equals(userSelectedResource.getPath())) {
+                            shouldTransfer = false;
+                            break;
+                        }
+                    }
+                }
+                if (shouldTransfer) {
+                    traversedFiles.add(userSelectedResource);
+                }
             }
         }
 

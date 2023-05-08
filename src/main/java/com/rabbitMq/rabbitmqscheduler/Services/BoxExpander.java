@@ -25,7 +25,7 @@ public class BoxExpander extends DestinationChunkSize implements FileExpander {
     }
 
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         List<EntityInfo> transferFiles = new ArrayList<>();
         Stack<BoxFolder> travStack = new Stack<>();//this will only hold folders to traverse
         if(userSelectedResources.isEmpty()) return new ArrayList<>(); //we need to signal the cancellation of this transferjob request.
@@ -54,7 +54,20 @@ public class BoxExpander extends DestinationChunkSize implements FileExpander {
                 if (child instanceof BoxFile.Info) {
                     BoxFile.Info fileInfo = (BoxFile.Info) child;
                     BoxFile boxFile = new BoxFile(this.connection, fileInfo.getID());
-                    transferFiles.add(boxFileToEntityInfo(boxFile));
+                    EntityInfo entityInfo = boxFileToEntityInfo(boxFile);
+                    boolean shouldTransfer = true;
+                    if (!overwrite) {
+                        for (EntityInfo existingFile : transferFiles) {
+                            if (existingFile.getName().equals(entityInfo.getName()) &&
+                                    existingFile.getPath().equals(entityInfo.getPath())) {
+                                shouldTransfer = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (shouldTransfer) {
+                        transferFiles.add(boxFileToEntityInfo(boxFile));
+                    }
                 } else if (child instanceof BoxFolder.Info) {
                     BoxFolder.Info folderInfo = (BoxFolder.Info) child;
                     BoxFolder childFolder = new BoxFolder(this.connection, folderInfo.getID());

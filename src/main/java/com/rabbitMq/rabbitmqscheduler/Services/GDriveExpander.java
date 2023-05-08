@@ -58,9 +58,21 @@ public class GDriveExpander extends DestinationChunkSize implements FileExpander
     }
 
     @Override
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath, boolean overwrite) {
         Stack<File> fileListStack = new Stack<>();
         List<EntityInfo> fileInfoList = new ArrayList<>();
+        // Remove files on the destination if overwrite flag is not set
+        if (!overwrite) {
+            for (EntityInfo fileInfo : userSelectedResources) {
+                String fileQuery = "'" + fileInfo.getId() + "' in parents and trashed=false";
+                try {
+                    // Delete the file
+                    client.files().delete(fileInfo.getId()).execute();
+                } catch (IOException e) {
+                    logger.error("Error deleting file with ID: " + fileInfo.getId(), e);
+                }
+            }
+        }
             for(EntityInfo fileInfo : userSelectedResources){
                 String fileQuery = "'" + fileInfo.getId() + "' in parents and trashed=false";
                 EntityInfo info = getMetadataForfile(fileInfo.getId());

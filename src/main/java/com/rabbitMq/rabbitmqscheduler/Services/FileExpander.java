@@ -23,6 +23,6 @@ public interface FileExpander {
      * @param basePath: This is the path to the file we want to expand. This can also be an id for an OAuth flat file system basically
      * @return
      */
-    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources,String basePath);
+    public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources,String basePath, boolean overwrite);
 
 }
