@@ -21,6 +21,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-vault-config</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>com.box</groupId>
             <artifactId>box-java-sdk</artifactId>
             <version>3.7.1</version>
