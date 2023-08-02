@@ -7,5 +7,8 @@ RUN mvn -f /home/app/pom.xml clean package -DskipTests
 FROM openjdk:11-jre-slim
 COPY --from=build /home/app/target/rabbitmq-scheduler-0.0.1-SNAPSHOT.jar /usr/local/lib/rabbitmq-scheduler-0.0.1-SNAPSHOT.jar
 EXPOSE 8083
+
+ENV VAULT_TOKEN="000000000000000"
+
 ENTRYPOINT ["java","-jar","/usr/local/lib/rabbitmq-scheduler-0.0.1-SNAPSHOT.jar"]
 
