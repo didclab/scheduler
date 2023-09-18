@@ -1,0 +1,43 @@
+server:
+  port: 8061
+
+spring:
+  application:
+    name: TransferScheduler
+  hazelcast:
+
+rabbitmq:
+  host: ${RMQ_HOST:localhost}
+  port: ${RMQ_PORT:5672}
+  username: ${RMQ_USER:guest}
+  password: ${RMQ_PWD:guest}
+
+eureka:
+  client:
+    enabled: true
+    discovery:
+      enabled: true
+    serviceUrl:
+      defaultZone: http://${EUREKA_USER:admin}:${EUREKA_PASS:admin}@${EUREKA_URI:localhost:8090}/eureka
+    healthcheck:
+      enabled: true
+
+cred:
+  service:
+    eureka:
+      uri: http://EndpointCredentialService/v1/endpoint-cred
+
+gdrive:
+  appname: OneDataShare-Prod
+  client:
+    id: ${ODS_GDRIVE_CLIENT_ID}
+    secret: ${ODS_GDRIVE_CLIENT_SECRET}
+
+ods:
+  rabbitmq:
+    exchange: ods.exchange
+    queue: transferqueue
+    routingkey: ods.routing
+
+dropbox:
+  identifier: ${ODS_DROPBOX_IDENTIFIER:OneDataShare-DIDCLab}
