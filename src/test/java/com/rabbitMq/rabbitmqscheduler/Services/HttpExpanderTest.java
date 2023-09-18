@@ -15,7 +15,7 @@ public class HttpExpanderTest extends TestCase {
         AccountEndpointCredential cred = new AccountEndpointCredential();
         cred.setAccountId("testHttpServer");
         cred.setUsername("cc");
-        cred.setUri("http://129.114.108.167:80");
+        cred.setUri("http://129.114.109.132:80");
         return cred;
     }
 
@@ -30,54 +30,93 @@ public class HttpExpanderTest extends TestCase {
             System.out.println(fileInfo.toString());
         }
     }
-    public void testParallelFile(){
+
+    public void testParallelDirectoryOneFiles(){
         testObj = new HttpExpander();
         testObj.createClient(this.credential());
         ArrayList<EntityInfo> directoryToExpand = new ArrayList<>();
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("parallel_file.txt");
-        entityInfo.setPath("/parallel_file.txt");
-        directoryToExpand.add(entityInfo);
-
-        List<EntityInfo> files = testObj.expandedFileSystem(directoryToExpand, "/");
-        Assert.assertTrue(files.size() == 1);
-        Assert.assertTrue(files.get(0).getId().equals("parallel_file.txt"));
-        Assert.assertEquals(10737418240L, files.get(0).getSize());
-    }
-    public void testParallelDirectory(){
-        testObj = new HttpExpander();
-        testObj.createClient(this.credential());
-        ArrayList<EntityInfo> directoryToExpand = new ArrayList<>();
-        EntityInfo entityInfo = new EntityInfo();
-        entityInfo.setId("parallel/");
-        entityInfo.setPath("/parallel/");
-        directoryToExpand.add(entityInfo);
-        List<EntityInfo> files = testObj.expandedFileSystem(directoryToExpand, "/");
-        for(EntityInfo file : files){
-            Assert.assertTrue(file.getId().contains("parallel_file.txt"));
-            Assert.assertEquals(10737418240L, file.getSize());
-        }
-        Assert.assertEquals(10, files.size());
-    }
-    public void testCCDirAndPDir(){
-        testObj = new HttpExpander();
-        testObj.createClient(this.credential());
-        ArrayList<EntityInfo> directoryToExpand = new ArrayList<>();
-        EntityInfo pInfo = new EntityInfo();
-        pInfo.setId("parallel/");
-        pInfo.setPath("/parallel/");
-
-        EntityInfo ccInfo = new EntityInfo();
-        ccInfo.setId("concurrency/");
-        ccInfo.setPath("/concurrency/");
-
-        directoryToExpand.add(pInfo);
-        directoryToExpand.add(ccInfo);
+        directoryToExpand.add(parallelFilesDir());
         List<EntityInfo> files = testObj.expandedFileSystem(directoryToExpand, "");
+        Assert.assertTrue(files.size() == 1);
+        Assert.assertTrue(files.get(0).getId().equals("montyParallel.dmg"));
+        Assert.assertEquals(4294967296L, files.get(0).getSize());
+    }
+
+    public void testHelloWorldDirTwoFiles(){
+        testObj = new HttpExpander();
+        testObj.createClient(this.credential());
+        ArrayList<EntityInfo> directoryToExpand = new ArrayList<>();
+        directoryToExpand.add(helloWorldTwoFiles());
+        List<EntityInfo> files = testObj.expandedFileSystem(directoryToExpand, "");
+        Assert.assertTrue(files.size() == 2);
         for(EntityInfo fileInfo : files){
-            Assert.assertTrue(fileInfo.getId().contains("parallel_file.txt") || fileInfo.getId().contains("conc_file.txt"));
-            Assert.assertTrue(fileInfo.getSize() == 10737418240L || fileInfo.getSize() == 1073741824L);
+            Assert.assertTrue(!fileInfo.getId().equals(".."));
+            Assert.assertTrue(!fileInfo.getId().equals("."));
         }
-        Assert.assertEquals(85, files.size());
+        Assert.assertTrue(files.get(0).getId().equals("monty-7.dmg"));
+        Assert.assertTrue(files.get(1).getId().equals("monty-7.dmg"));
+        Assert.assertEquals(1073741824, files.get(0).getSize());
+        Assert.assertEquals(1073741824, files.get(1).getSize());
+    }
+
+    public void testNestedTwoLevels(){
+        testObj = new HttpExpander();
+        testObj.createClient(this.credential());
+        ArrayList<EntityInfo> selectedFolders = new ArrayList<>();
+        selectedFolders.add(anotherLayer());
+        selectedFolders.add(parallelFilesDir());
+        List<EntityInfo> fInfo = testObj.expandedFileSystem(selectedFolders, "");
+        for(EntityInfo fileInfo : fInfo){
+            if(fileInfo.getId().equals("montyParallel.dmg")){
+                Assert.assertEquals(4294967296L, fileInfo.getSize());
+            }
+            if(fileInfo.getId().equals("monty-7.dmg")){
+                Assert.assertEquals(1073741824L, fileInfo.getSize());
+            }
+        }
+        Assert.assertEquals(2, fInfo.size());
+    }
+
+    public void testOneFileExpansion(){
+        testObj = new HttpExpander();
+        testObj.createClient(this.credential());
+        ArrayList<EntityInfo> selectedFolders = new ArrayList<>();
+        selectedFolders.add(singleFileInfo());
+        List<EntityInfo> fInfo = testObj.expandedFileSystem(selectedFolders, "");
+        for(EntityInfo fileInfo : fInfo){
+            if(fileInfo.getId().equals("monty-1.dmg")){
+                Assert.assertEquals(1073741824L, fileInfo.getSize());
+            }
+            System.out.println(fileInfo.toString());
+        }
+        Assert.assertEquals(1, fInfo.size());
+    }
+
+    public EntityInfo parallelFilesDir(){
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("parallelFiles/");
+        fileInfo.setPath("parallelFiles/");
+        return fileInfo;
+    }
+
+    public EntityInfo anotherLayer(){
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("anotherLayer/");
+        fileInfo.setPath("helloWorld/anotherLayer/");
+        return fileInfo;
+    }
+
+    public EntityInfo helloWorldTwoFiles(){
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("helloWorld/");
+        fileInfo.setPath("helloWorld/");
+        return fileInfo;
+    }
+
+    public EntityInfo singleFileInfo(){
+        EntityInfo fileInfo = new EntityInfo();
+        fileInfo.setId("monty-1.dmg");
+        fileInfo.setPath("monty-1.dmg");
+        return fileInfo;
     }
 }
