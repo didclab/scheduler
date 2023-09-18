@@ -3,6 +3,7 @@ package com.rabbitMq.rabbitmqscheduler.Services;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.AccountEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.DTO.credential.OAuthEndpointCredential;
 import com.rabbitMq.rabbitmqscheduler.Enums.EndPointType;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 
 @Component
 public class CredentialService {
