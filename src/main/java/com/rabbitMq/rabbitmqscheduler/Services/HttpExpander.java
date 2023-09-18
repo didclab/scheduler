@@ -47,7 +47,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         Stack<Element> directoriesToTraverse = new Stack<>();
         if (basePath.isEmpty()) basePath = "/";
         if (userSelectedResources.isEmpty()) { //we move the whole damn server
-            logger.info(this.credential.getUri() + basePath);
+            logger.info("User resources is empty gonna just send the whole server I guess");
             Document doc = Jsoup.connect(this.credential.getUri() + basePath).get();
             Elements links = doc.select("body a");
             for (Element elem : links) {
@@ -59,12 +59,13 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             }
         } else { //move only files/folders the user selected
             for (EntityInfo selectedFiles : userSelectedResources) {
-                logger.info(this.credential.getUri() + basePath + selectedFiles.getPath());
                 //we have a folder to transfer
                 if(selectedFiles.getPath().endsWith("/")){
+
                     Document doc = Jsoup.connect(this.credential.getUri() + basePath + selectedFiles.getPath())
                             .ignoreContentType(true)
                             .get();
+                    logger.info(doc.toString());
                     Elements links = doc.select("body a");
                     for (Element elem : links) {
                         if (elem.text().endsWith("/")) { //directory to expand
@@ -74,7 +75,7 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
                         }
                     }
                 }else{
-                    filesToSend.add(this.fileToInfo(this.credential.getUri() + basePath + selectedFiles.getPath()));
+                    filesToSend.add(this.fileToInfo(this.credential.getUri() + Paths.get(basePath, selectedFiles.getPath()).toString()));
                 }
             }
         }
@@ -84,8 +85,8 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
             if (directory.text().contains("..") || directory.text().contains(".")) {
                 continue;
             }
-            logger.info(directory.baseUri() + "/" + directory.text());
-            Document doc = Jsoup.connect(directory.baseUri() + "/" + directory.text()).get();
+            logger.info(directory.baseUri() + directory.text());
+            Document doc = Jsoup.connect(directory.baseUri() + basePath +directory.text()).get();
             Elements links = doc.select("body a");
             for (Element elem : links) {
                 if (elem.text().endsWith("/")) { //directory to expand
@@ -102,12 +103,13 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         EntityInfo fileInfo = new EntityInfo();
         URL url = new URL(elem.absUrl("href"));
         long fileSize = url.openConnection().getContentLengthLong();
+        Path path = Path.of(url.getPath());
         logger.info("File Name:{}", elem.text());
         logger.info("file size={}", fileSize);
-        logger.info("File Path: {}", url.getPath());
+        logger.info("File Path: {}", path);
         fileInfo.setId(elem.text());
         fileInfo.setSize(fileSize);
-        fileInfo.setPath(url.getPath());
+        fileInfo.setPath(path.toAbsolutePath().toString());
         return fileInfo;
     }
 
@@ -116,10 +118,11 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         URL url = new URL(strUrl);
         URLConnection conn = url.openConnection();
         long fileSize = conn.getContentLengthLong();
-        logger.info("File Name:{}", conn.getURL().getFile());
+        String fileName = Paths.get(conn.getURL().getFile()).getFileName().toString();
+        logger.info("File Name:{}", fileName);
         logger.info("file size={}", fileSize);
         logger.info("File Path: {}", url.getPath());
-        fileInfo.setId(conn.getURL().getFile());
+        fileInfo.setId(fileName);
         fileInfo.setSize(fileSize);
         fileInfo.setPath(url.getPath());
         return fileInfo;
