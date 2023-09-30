@@ -1,12 +1,8 @@
 package com.onedatashare.scheduler.config;
 
 import com.hazelcast.config.Config;
-import com.hazelcast.config.MulticastConfig;
-import com.hazelcast.config.NetworkConfig;
-import com.hazelcast.config.RestEndpointGroup;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.instance.impl.HazelcastInstanceFactory;
-import com.netflix.discovery.EurekaClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,20 +11,17 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 public class CacheConfig {
 
-    @Value("eureka.client.serviceUrl.defaultZone")
+    @Value("${eureka.client.serviceUrl.defaultZone}")
     String eurekaUrl;
+
+    @Value("${spring.application.name}")
+    String springName;
 
     @Bean(name = "hazelcastConfig")
     @Profile("prod")
-    public Config prodHazelcastConfig(EurekaClient eurekaClient) {
+    public Config prodHazelcastConfig() {
         Config config = new Config();
-        config.getNetworkConfig().getRestApiConfig()
-                .setEnabled(true)
-                .enableGroups(RestEndpointGroup.DATA);
-        config.getNetworkConfig().getJoin().getEurekaConfig()
-                .setEnabled(true)
-                .setProperty("self-registration", "true")
-                .setProperty("namespace", "hazelcast");
+        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true).setProperty("access-key", System.getenv("AWS_ACCESS_KEY")).setProperty("secret-key", System.getenv("AWS_SECRET_KEY")).setProperty("region", System.getenv("AWS_REGION")).setProperty("tag-key", System.getenv("AWS_TAG_KEY")).setProperty("tag-value", System.getenv("AWS_TAG_SECRET")).setProperty("use-public-ip", "true");
         return config;
     }
 
@@ -46,4 +39,5 @@ public class CacheConfig {
     public HazelcastInstance hazelcastInstance(Config hazelcastConfig) {
         return HazelcastInstanceFactory.newHazelcastInstance(hazelcastConfig);
     }
+
 }

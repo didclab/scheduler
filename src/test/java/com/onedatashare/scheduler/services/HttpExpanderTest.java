@@ -1,8 +1,8 @@
-package com.rabbitMq.rabbitmqscheduler.services;
+package com.onedatashare.scheduler.services;
 
-import com.rabbitMq.rabbitmqscheduler.model.EntityInfo;
-import com.rabbitMq.rabbitmqscheduler.model.credential.AccountEndpointCredential;
-import com.rabbitMq.rabbitmqscheduler.services.expanders.HttpExpander;
+import com.onedatashare.scheduler.model.EntityInfo;
+import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
+import com.onedatashare.scheduler.services.expanders.HttpExpander;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
