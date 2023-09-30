@@ -1,0 +1,23 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: local-rabbitmq
+    ports:
+      - "5672:5672"  # RabbitMQ default port
+      - "15672:15672"  # RabbitMQ management plugin port (for web UI)
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+#  scheduler:
+#    build:
+#      dockerfile: ./Dockerfile
+#    container_name: transfer_scheduler
+#    env_file:
+#      - scheduler-dev.env
+#    command:
+#      -
+
+
+
