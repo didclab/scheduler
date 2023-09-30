@@ -21,7 +21,10 @@ public class CacheConfig {
     @Profile("prod")
     public Config prodHazelcastConfig() {
         Config config = new Config();
-        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true).setProperty("access-key", System.getenv("AWS_ACCESS_KEY")).setProperty("secret-key", System.getenv("AWS_SECRET_KEY")).setProperty("region", System.getenv("AWS_REGION")).setProperty("tag-key", System.getenv("AWS_TAG_KEY")).setProperty("tag-value", System.getenv("AWS_TAG_SECRET")).setProperty("use-public-ip", "true");
+        config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true)
+                .setProperty("tag-key", System.getenv("AWS_TAG_KEY"))
+                .setProperty("tag-value", System.getenv("AWS_TAG_SECRET"))
+                .setProperty("use-public-ip", "true");
         return config;
     }
 
