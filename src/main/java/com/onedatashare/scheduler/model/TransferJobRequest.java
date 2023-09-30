@@ -11,6 +11,7 @@ import lombok.Getter;
 
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -23,7 +24,7 @@ public class TransferJobRequest {
     private Destination destination;
     private TransferOptions options;
     private String transferNodeName;
-
+    private UUID jobUuid;
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

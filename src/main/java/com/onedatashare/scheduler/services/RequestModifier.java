@@ -109,7 +109,7 @@ public class RequestModifier {
         TransferJobRequest transferJobRequest = new TransferJobRequest();
         transferJobRequest.setOptions(TransferOptions.createTransferOptionsFromUser(odsTransferRequest.getOptions()));
         transferJobRequest.setOwnerId(odsTransferRequest.getOwnerId());
-
+        transferJobRequest.setJobUuid(odsTransferRequest.getJobUuid());
         TransferJobRequest.Source s = new TransferJobRequest.Source();
         s.setCredId(odsTransferRequest.getSource().getCredId());
         s.setFileSourcePath(odsTransferRequest.getSource().getFileSourcePath());
