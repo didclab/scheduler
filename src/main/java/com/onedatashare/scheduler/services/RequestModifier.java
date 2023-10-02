@@ -116,7 +116,7 @@ public class RequestModifier {
         s.setType(odsTransferRequest.getSource().getType());
 
         TransferJobRequest.Destination d = new TransferJobRequest.Destination();
-        d.setFileDestinationPath(odsTransferRequest.getDestination().getDestinationPath());
+        d.setFileDestinationPath(odsTransferRequest.getDestination().getFileDestinationPath());
         d.setCredId(odsTransferRequest.getDestination().getCredId());
         d.setType(odsTransferRequest.getDestination().getType());
 
@@ -135,6 +135,7 @@ public class RequestModifier {
             d.setOauthDestCredential(destinationCredential);
         }
         List<EntityInfo> expandedFiles = this.selectAndExpand(s, odsTransferRequest.getSource().getResourceList());
+        logger.info("Expanded files: {}", expandedFiles);
         expandedFiles = this.checkDestinationChunkSize(expandedFiles, d, odsTransferRequest.getOptions().getChunkSize());
         s.setInfoList(expandedFiles);
         transferJobRequest.setSource(s);

@@ -26,7 +26,6 @@ public class CredentialService {
     public void adjustUrl(){
         credListUrl = credentialEureka+"/{userId}/{type}/{accountId}";
         logger.info(credListUrl);
-        this.restTemplate = new RestTemplate();
     }
 
     public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId){
