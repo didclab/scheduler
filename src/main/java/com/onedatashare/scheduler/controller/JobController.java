@@ -7,7 +7,6 @@ import com.onedatashare.scheduler.services.MessageSender;
 import com.onedatashare.scheduler.services.RequestModifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,14 +17,12 @@ import java.util.UUID;
 
 @RestController
 public class JobController {
-    private static final Logger logger = LoggerFactory.getLogger(JobController.class);
     private final JobScheduler jobScheduler;
 
-    @Autowired
     MessageSender messageSender;
 
-    @Autowired
     RequestModifier requestModifier;
+    Logger logger = LoggerFactory.getLogger(JobController.class);
 
     public JobController(MessageSender messageSender, RequestModifier requestModifier, JobScheduler jobScheduler) {
         this.requestModifier = requestModifier;
@@ -35,6 +32,7 @@ public class JobController {
 
     @PostMapping("/job/schedule")
     public ResponseEntity<UUID> scheduleJob(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime jobStartTime, @RequestBody RequestFromODSDTO transferRequest) {
+        logger.info(transferRequest.toString());
         UUID id = this.jobScheduler.saveScheduledJob(transferRequest, jobStartTime);
         if (id == null) {
             return ResponseEntity.badRequest().body(null);
@@ -73,4 +71,5 @@ public class JobController {
     public ResponseEntity<UUID> runJob(@RequestBody RequestFromODSDTO odsTransferRequest) {
         return this.scheduleJob(LocalDateTime.now(), odsTransferRequest);
     }
+
 }

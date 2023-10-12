@@ -3,12 +3,7 @@ package com.onedatashare.scheduler.model;
 import com.onedatashare.scheduler.enums.EndPointType;
 import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.Getter;
-
+import lombok.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +20,7 @@ public class TransferJobRequest {
     private TransferOptions options;
     private String transferNodeName;
     private UUID jobUuid;
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

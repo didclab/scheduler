@@ -23,18 +23,18 @@ public class CredentialService {
     RestTemplate restTemplate;
 
     @PostConstruct
-    public void adjustUrl(){
-        credListUrl = credentialEureka+"/{userId}/{type}/{accountId}";
+    public void adjustUrl() {
+        credListUrl = credentialEureka + "/{userId}/{type}/{accountId}";
         logger.info(credListUrl);
     }
 
-    public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId){
-        logger.info(type + ":"+userId+":"+credId);
+    public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId) {
+        logger.info(type + ":" + userId + ":" + credId);
         return restTemplate.getForObject(credListUrl, AccountEndpointCredential.class, userId, type, credId);
     }
 
-    public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId){
-        logger.info("The OAuth type is: " + type + "UserId is: "+userId+" CredId is:"+credId);
+    public OAuthEndpointCredential fetchOAuthCredential(EndPointType type, String userId, String credId) {
+        logger.info("The OAuth type is: " + type + "UserId is: " + userId + " CredId is:" + credId);
         return restTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
     }
 }
