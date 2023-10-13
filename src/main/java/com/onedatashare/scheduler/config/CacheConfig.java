@@ -22,8 +22,7 @@ public class CacheConfig {
     public Config prodHazelcastConfig() {
         Config config = new Config();
         config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true)
-                .setProperty("HZ_DISCOVERY", System.getenv("HZ_DISCOVERY"))
-                .setProperty("HZ_DISCOVERY_SECRET", System.getenv("HZ_DISCOVERY_SECRET"))
+                .setProperty("security-group-name", "Transfer Scheduler")
                 .setProperty("use-public-ip", "true");
         return config;
     }
