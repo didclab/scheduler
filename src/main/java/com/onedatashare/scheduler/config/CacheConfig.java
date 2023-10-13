@@ -22,8 +22,8 @@ public class CacheConfig {
     public Config prodHazelcastConfig() {
         Config config = new Config();
         config.getNetworkConfig().getJoin().getAwsConfig().setEnabled(true)
-                .setProperty("tag-key", System.getenv("AWS_TAG_KEY"))
-                .setProperty("tag-value", System.getenv("AWS_TAG_SECRET"))
+                .setProperty("HZ_DISCOVERY", System.getenv("HZ_DISCOVERY"))
+                .setProperty("HZ_DISCOVERY_SECRET", System.getenv("HZ_DISCOVERY_SECRET"))
                 .setProperty("use-public-ip", "true");
         return config;
     }
