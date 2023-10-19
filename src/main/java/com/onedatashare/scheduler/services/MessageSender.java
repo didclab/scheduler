@@ -35,7 +35,7 @@ public class MessageSender {
         logger.debug(odsTransferRequest.toString());
         boolean sourceVfs = odsTransferRequest.getSource().getType().equals(EndPointType.vfs);
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
-        if(!odsTransferRequest.getTransferNodeName().isEmpty()){
+        if( odsTransferRequest.getTransferNodeName() != null && !odsTransferRequest.getTransferNodeName().isEmpty()){
             routingKey = odsTransferRequest.getTransferNodeName();
             rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
         }else if (sourceVfs || destVfs) {

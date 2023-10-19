@@ -2,7 +2,6 @@ package com.onedatashare.scheduler.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -20,7 +19,7 @@ public class UserTransferOptions implements Serializable {
     private Integer pipeSize;
     private Integer chunkSize;
 
-    public UserTransferOptions(){
+    public UserTransferOptions() {
         this.compress = false;
         this.encrypt = false;
         this.optimizer = "";

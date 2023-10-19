@@ -25,7 +25,6 @@ public class CredentialService {
     @PostConstruct
     public void adjustUrl() {
         credListUrl = credentialEureka + "/{userId}/{type}/{accountId}";
-        logger.info(credListUrl);
     }
 
     public AccountEndpointCredential fetchAccountCredential(String type, String userId, String credId) {
