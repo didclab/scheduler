@@ -52,7 +52,7 @@ public class MessageSender {
         } else {
             //for all transfers that are using the ODS backend
             logger.info("Ods Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), queueName);
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
+            rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
         }
         logger.info("Processed Job: {}", odsTransferRequest);
     }
