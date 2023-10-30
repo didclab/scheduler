@@ -35,9 +35,8 @@ public class MessageSender {
         logger.debug(odsTransferRequest.toString());
         boolean sourceVfs = odsTransferRequest.getSource().getType().equals(EndPointType.vfs);
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
-        if( odsTransferRequest.getTransferNodeName() != null && !odsTransferRequest.getTransferNodeName().isEmpty()){
-            routingKey = odsTransferRequest.getTransferNodeName();
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
+        if(odsTransferRequest.getTransferNodeName() != null && !odsTransferRequest.getTransferNodeName().isEmpty()){
+            rmqTemplate.convertAndSend(exchange, odsTransferRequest.getTransferNodeName(), odsTransferRequest);
         }else if (sourceVfs || destVfs) {
             //for any vfs transfer where the user has their own transfer-service running on their metal.
             String routingKey = this.routingKey;
@@ -52,7 +51,7 @@ public class MessageSender {
         } else {
             //for all transfers that are using the ODS backend
             logger.info("Ods Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), queueName);
-            rmqTemplate.convertAndSend(exchange, queueName, odsTransferRequest);
+            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
         }
         logger.info("Processed Job: {}", odsTransferRequest);
     }
