@@ -84,18 +84,18 @@ public class RequestModifier {
                 return sftpExpander.expandedDestFileSystem(destination.getFileDestinationPath());
             case http:
                 httpExpander.createClient(destination.getVfsDestCredential());
-                return httpExpander.expandedFileSystem(selectedResources, destination.getFileDestinationPath());
+                return httpExpander.expandedDestFileSystem(destination.getFileDestinationPath());
             case box:
                 boxExpander.createClient(destination.getOauthDestCredential());
-                return boxExpander.expandedFileSystem(selectedResources, destination.getFileDestinationPath());
+                return boxExpander.expandedDestFileSystem(destination.getFileDestinationPath());
             case dropbox:
                 dropBoxExpander.createClient(destination.getOauthDestCredential());
-                return dropBoxExpander.expandedFileSystem(selectedResources, destination.getFileDestinationPath());
+                return dropBoxExpander.expandedDestFileSystem(destination.getFileDestinationPath());
             case vfs:
                 return selectedResources;
             case gdrive:
                 gDriveExpander.createClient(destination.getOauthDestCredential());
-                return gDriveExpander.expandedFileSystem(selectedResources, destination.getFileDestinationPath());
+                return gDriveExpander.expandedDestFileSystem(destination.getFileDestinationPath());
 
         }
         return null;
@@ -174,14 +174,14 @@ public class RequestModifier {
         if (transferJobRequest.getOptions().isOverwrite())
             s.setInfoList(expandedFiles);
         else {
-            //Check files present in destination (given path level only) and remove them from infoList sent from source
+            //Check files present in destination (given path level only)
 
             //can use selectAndExpand but not for vfs
             List<EntityInfo> destExpandedFiles = this.selectAndExpandDestination(d, new ArrayList<>());
 
 
             /*
-            for each file ID at dest, check if present in source list, if no, no action, if yes, remove that file id from src info list
+            for each file ID at dest, check if present in source list, if yes, remove that file id from src info list
             expandedFiles.remove()
             s.setInfoList(expandedFiles);
             */

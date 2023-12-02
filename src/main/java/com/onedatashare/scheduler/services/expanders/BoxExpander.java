@@ -67,6 +67,34 @@ public class BoxExpander extends DestinationChunkSize implements FileExpander {
         return transferFiles;
     }
 
+
+    public List<EntityInfo> expandedDestFileSystem(String basePath) {
+        List<EntityInfo> destFilesList = new ArrayList<>();
+        Stack<BoxFolder> travStack = new Stack<>();//this will only hold folders to traverse
+
+        try{
+            //id = 0 represents root folder in box
+            BoxFolder temp = new BoxFolder(this.connection, "0");
+            travStack.push(temp);
+        }catch (BoxAPIException ignored){
+            logger.info("Tried to open {} as a folder but it did not work", "0");
+        }
+
+
+        while(!travStack.isEmpty()){
+            BoxFolder folder = travStack.pop();
+            for(BoxItem.Info child : folder){
+                //ignore folders, if a file, add to list
+                if (child instanceof BoxFile.Info) {
+                    BoxFile.Info fileInfo = (BoxFile.Info) child;
+                    BoxFile boxFile = new BoxFile(this.connection, fileInfo.getID());
+                    destFilesList.add(boxFileToEntityInfo(boxFile));
+                }
+            }
+        }
+        return destFilesList;
+    }
+
     @Override
     public List<EntityInfo> destinationChunkSize(List<EntityInfo> expandedFiles, String basePath, Integer userChunkSize) {
         BoxFolder destinationUploadFolder = new BoxFolder(this.connection, basePath);
