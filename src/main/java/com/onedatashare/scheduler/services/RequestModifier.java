@@ -174,18 +174,18 @@ public class RequestModifier {
         if (transferJobRequest.getOptions().isOverwrite())
             s.setInfoList(expandedFiles);
         else {
-            //Check files present in destination (given path level only)
-
-            //can use selectAndExpand but not for vfs
+            //Check files present in destination
             List<EntityInfo> destExpandedFiles = this.selectAndExpandDestination(d, new ArrayList<>());
 
-
-            /*
-            for each file ID at dest, check if present in source list, if yes, remove that file id from src info list
-            expandedFiles.remove()
+            //for each file ID at dest, check if present in source list, if yes, remove that file id from src info list
+            for (EntityInfo destFile : destExpandedFiles) {
+                for (EntityInfo srcFile : expandedFiles) {
+                    if (destFile.getId().equals(srcFile.getId())) {
+                        expandedFiles.remove(srcFile);
+                    }
+                }
+            }
             s.setInfoList(expandedFiles);
-            */
-
 
             //TODO: fix box case handling where if no files selected by user (to match other cases)
         }
