@@ -186,8 +186,6 @@ public class RequestModifier {
                 }
             }
             s.setInfoList(expandedFiles);
-
-            //TODO: fix box case handling where if no files selected by user (to match other cases)
         }
 
         transferJobRequest.setSource(s);
