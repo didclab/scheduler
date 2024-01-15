@@ -1,7 +1,9 @@
 package com.onedatashare.scheduler.controller;
 
+import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.model.RequestFromODS;
 import com.onedatashare.scheduler.model.RequestFromODSDTO;
+import com.onedatashare.scheduler.model.TransferJobRequest;
 import com.onedatashare.scheduler.services.JobScheduler;
 import com.onedatashare.scheduler.services.MessageSender;
 import com.onedatashare.scheduler.services.RequestModifier;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,6 +42,16 @@ public class JobController {
         } else {
             return ResponseEntity.ok(id);
         }
+    }
+
+    @PostMapping("/job/direct")
+    public ResponseEntity<UUID> directJob(@RequestBody TransferJobRequest transferRequest) {
+        UUID jobUuid = UUID.randomUUID();
+        transferRequest.setJobUuid(jobUuid);
+        List<EntityInfo> fileList = this.requestModifier.selectAndExpand(transferRequest.getSource(), transferRequest.getSource().getInfoList());
+        transferRequest.getSource().setInfoList(fileList);
+        this.messageSender.sendTransferRequest(transferRequest);
+        return ResponseEntity.ok(jobUuid);
     }
 
     @GetMapping("/jobs")

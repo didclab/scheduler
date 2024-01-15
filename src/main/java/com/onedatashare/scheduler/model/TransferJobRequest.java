@@ -5,6 +5,7 @@ import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
 import lombok.*;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,7 @@ public class TransferJobRequest {
     private Destination destination;
     private TransferOptions options;
     private String transferNodeName;
+    @Nullable
     private UUID jobUuid;
 
     @Data

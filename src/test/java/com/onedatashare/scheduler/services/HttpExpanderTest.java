@@ -16,7 +16,7 @@ public class HttpExpanderTest extends TestCase {
         AccountEndpointCredential cred = new AccountEndpointCredential();
         cred.setAccountId("testHttpServer");
         cred.setUsername("cc");
-        cred.setUri("http://129.114.108.167:80");
+        cred.setUri("http://129.114.108.180:80");
         return cred;
     }
 
@@ -58,7 +58,24 @@ public class HttpExpanderTest extends TestCase {
             Assert.assertTrue(file.getId().contains("parallel_file.txt"));
             Assert.assertEquals(10737418240L, file.getSize());
         }
-        Assert.assertEquals(10, files.size());
+        Assert.assertEquals(4, files.size());
+    }
+
+    public void testConcurrencyDir(){
+        testObj = new HttpExpander();
+        testObj.createClient(this.credential());
+        ArrayList<EntityInfo> directoryToExpand = new ArrayList<>();
+        EntityInfo entityInfo = new EntityInfo();
+        entityInfo.setId("concurrency/");
+        entityInfo.setPath("/concurrency/");
+        directoryToExpand.add(entityInfo);
+        List<EntityInfo> files = testObj.expandedFileSystem(directoryToExpand, "/");
+        for(EntityInfo file : files){
+            Assert.assertTrue(file.getId().contains("conc_file.txt"));
+            Assert.assertEquals(524288000, file.getSize());
+        }
+        Assert.assertEquals(40, files.size());
+
     }
     public void testCCDirAndPDir(){
         testObj = new HttpExpander();

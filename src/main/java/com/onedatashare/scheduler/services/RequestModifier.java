@@ -87,6 +87,9 @@ public class RequestModifier {
         switch (destination.getType()) {
             case box:
                 boxExpander.createClient(destination.getOauthDestCredential());
+                if(destination.getFileDestinationPath() == null || destination.getFileDestinationPath().isEmpty()){
+                    destination.setFileDestinationPath("0");
+                }
                 return boxExpander.destinationChunkSize(entityInfo, destination.getFileDestinationPath(), userChunkSize);
             case dropbox:
                 return dropBoxExpander.destinationChunkSize(entityInfo, destination.getFileDestinationPath(), userChunkSize);

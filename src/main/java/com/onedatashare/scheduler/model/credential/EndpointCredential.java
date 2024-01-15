@@ -1,5 +1,6 @@
 package com.onedatashare.scheduler.model.credential;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -7,6 +8,7 @@ import lombok.Data;
  */
 @Data
 public class EndpointCredential {
+    @JsonIgnore
     protected String accountId;
 
     public EndpointCredential(){}
