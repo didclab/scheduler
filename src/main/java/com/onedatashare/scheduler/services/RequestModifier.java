@@ -1,7 +1,10 @@
 package com.onedatashare.scheduler.services;
 
 import com.onedatashare.scheduler.enums.EndPointType;
-import com.onedatashare.scheduler.model.*;
+import com.onedatashare.scheduler.model.EntityInfo;
+import com.onedatashare.scheduler.model.RequestFromODS;
+import com.onedatashare.scheduler.model.TransferJobRequest;
+import com.onedatashare.scheduler.model.TransferOptions;
 import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.services.expanders.*;
@@ -10,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 public class RequestModifier {
@@ -33,6 +39,9 @@ public class RequestModifier {
 
     @Autowired
     GDriveExpander gDriveExpander;
+
+    @Autowired
+    StaticOptimizer staticOptimizer;
 
     Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
     Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
@@ -87,7 +96,7 @@ public class RequestModifier {
         switch (destination.getType()) {
             case box:
                 boxExpander.createClient(destination.getOauthDestCredential());
-                if(destination.getFileDestinationPath() == null || destination.getFileDestinationPath().isEmpty()){
+                if (destination.getFileDestinationPath() == null || destination.getFileDestinationPath().isEmpty()) {
                     destination.setFileDestinationPath("0");
                 }
                 return boxExpander.destinationChunkSize(entityInfo, destination.getFileDestinationPath(), userChunkSize);
@@ -144,6 +153,8 @@ public class RequestModifier {
         transferJobRequest.setSource(s);
         transferJobRequest.setDestination(d);
         transferJobRequest.setTransferNodeName(odsTransferRequest.getTransferNodeName());
+        TransferOptions newOptions = this.staticOptimizer.decideParams(transferJobRequest.getSource().getInfoList(), transferJobRequest.getOptions());
+        transferJobRequest.setOptions(newOptions);
         return transferJobRequest;
     }
 
@@ -166,4 +177,6 @@ public class RequestModifier {
             return chunkSize;
         }
     }
+
+
 }
