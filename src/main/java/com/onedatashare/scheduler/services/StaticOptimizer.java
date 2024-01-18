@@ -37,18 +37,20 @@ public class StaticOptimizer {
                 .mapToDouble(entityInfo -> entityInfo.getSize() / (1024.0 * 1024.0)) // Convert bytes to MB
                 .average().orElse(0.0);
         OptimizationParameterSet paramsToUse = new OptimizationParameterSet(transferOptions.getConcurrencyThreadCount(), transferOptions.getParallelThreadCount(), transferOptions.getPipeSize());
-        if (averageMb >= .25 && averageMb <= 25) {
-            paramsToUse = this.parameterBucket.get(0);
-        } else if (averageMb >= 26 && averageMb <= 100) {
-            paramsToUse = this.parameterBucket.get(1);
-        } else if (averageMb >= 101 && averageMb <= 600) {
-            paramsToUse = this.parameterBucket.get(2);
-        } else if (averageMb >= 600) {
-            paramsToUse = this.parameterBucket.get(3);
+        if(paramsToUse.getConcurrency() == 0 && paramsToUse.getParallelism() == 0){
+            if (averageMb >= .25 && averageMb <= 25) {
+                paramsToUse = this.parameterBucket.get(0);
+            } else if (averageMb >= 26 && averageMb <= 100) {
+                paramsToUse = this.parameterBucket.get(1);
+            } else if (averageMb >= 101 && averageMb <= 600) {
+                paramsToUse = this.parameterBucket.get(2);
+            } else if (averageMb >= 600) {
+                paramsToUse = this.parameterBucket.get(3);
+            }
+            transferOptions.setConcurrencyThreadCount(paramsToUse.getConcurrency());
+            transferOptions.setParallelThreadCount(paramsToUse.getParallelism());
+            transferOptions.setPipeSize(paramsToUse.getPipelining());
         }
-        transferOptions.setConcurrencyThreadCount(paramsToUse.getConcurrency());
-        transferOptions.setParallelThreadCount(paramsToUse.getParallelism());
-        transferOptions.setPipeSize(paramsToUse.getPipelining());
         return transferOptions;
     }
 
