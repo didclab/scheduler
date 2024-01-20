@@ -49,7 +49,7 @@ public class StaticOptimizer {
             }
             transferOptions.setConcurrencyThreadCount(paramsToUse.getConcurrency());
             transferOptions.setParallelThreadCount(paramsToUse.getParallelism());
-            transferOptions.setPipeSize(paramsToUse.getPipelining());
+//            transferOptions.setPipeSize(paramsToUse.getPipelining());
         }
         return transferOptions;
     }
