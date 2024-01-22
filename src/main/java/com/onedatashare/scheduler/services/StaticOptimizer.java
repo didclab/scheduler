@@ -22,7 +22,7 @@ public class StaticOptimizer {
         OptimizationParameterSet smallFiles = new OptimizationParameterSet(8, 1, 16);
         OptimizationParameterSet medium = new OptimizationParameterSet(4, 2, 8);
         OptimizationParameterSet large = new OptimizationParameterSet(8, 2, 4);
-        OptimizationParameterSet largest = new OptimizationParameterSet(5, 3, 3);
+        OptimizationParameterSet largest = new OptimizationParameterSet(10, 3, 3);
         map.put(0, smallFiles);
         map.put(1, medium);
         map.put(2, large);
