@@ -4,9 +4,9 @@ import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.model.RequestFromODS;
 import com.onedatashare.scheduler.model.RequestFromODSDTO;
 import com.onedatashare.scheduler.model.TransferJobRequest;
-import com.onedatashare.scheduler.services.JobScheduler;
 import com.onedatashare.scheduler.services.MessageSender;
 import com.onedatashare.scheduler.services.RequestModifier;
+import com.onedatashare.scheduler.services.TransferNodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -20,64 +20,50 @@ import java.util.UUID;
 
 @RestController
 public class JobController {
-    private final JobScheduler jobScheduler;
 
+    private final TransferNodeService transferNodeService;
     MessageSender messageSender;
 
     RequestModifier requestModifier;
     Logger logger = LoggerFactory.getLogger(JobController.class);
 
-    public JobController(MessageSender messageSender, RequestModifier requestModifier, JobScheduler jobScheduler) {
+    public JobController(MessageSender messageSender, RequestModifier requestModifier, TransferNodeService transferNodeService) {
         this.requestModifier = requestModifier;
         this.messageSender = messageSender;
-        this.jobScheduler = jobScheduler;
+        this.transferNodeService = transferNodeService;
     }
 
     @PostMapping("/job/schedule")
     public ResponseEntity<UUID> scheduleJob(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime jobStartTime, @RequestBody RequestFromODSDTO transferRequest) {
         logger.info(transferRequest.toString());
-        UUID id = this.jobScheduler.saveScheduledJob(transferRequest, jobStartTime);
-        if (id == null) {
-            return ResponseEntity.badRequest().body(null);
-        } else {
-            return ResponseEntity.ok(id);
-        }
+        UUID id = UUID.randomUUID();
+        RequestFromODS transferJob = new RequestFromODS();
+        transferJob.setTransferNodeName(transferRequest.getTransferNodeName());
+        transferJob.setOptions(transferRequest.getOptions());
+        transferJob.setDestination(transferRequest.getDestination());
+        transferJob.setSource(transferRequest.getSource());
+        transferJob.setOwnerId(transferRequest.getOwnerId());
+        transferJob.setJobUuid(id);
+        transferJob.setJobStartTime(jobStartTime);
+        TransferJobRequest transferJobRequest = this.requestModifier.createRequest(transferJob);
+        this.messageSender.routeTransferRequest(transferJobRequest);
+        return ResponseEntity.ok(id);
     }
 
-    @PostMapping("/job/direct")
-    public ResponseEntity<UUID> directJob(@RequestBody TransferJobRequest transferRequest) {
-        UUID jobUuid = UUID.randomUUID();
-        transferRequest.setJobUuid(jobUuid);
-        List<EntityInfo> fileList = this.requestModifier.selectAndExpand(transferRequest.getSource(), transferRequest.getSource().getInfoList());
-        transferRequest.getSource().setInfoList(fileList);
-        this.messageSender.sendTransferRequest(transferRequest);
-        return ResponseEntity.ok(jobUuid);
+    @GetMapping("/job/user")
+    public ResponseEntity<RequestFromODS> listUserJobs(@RequestParam String userName){
+        this.transferNodeService.listUserTransferNodes(userName);
     }
-
-    @GetMapping("/jobs")
-    public ResponseEntity<Collection<RequestFromODS>> listScheduledJobs(@RequestParam String userEmail) {
-        Collection<RequestFromODS> futureJobs = jobScheduler.listScheduledJobs(userEmail);
-        return ResponseEntity.ok(futureJobs);
-    }
-
     @GetMapping("/job/details")
-    public ResponseEntity<RequestFromODS> getScheduledJob(@RequestParam UUID jobUuid) {
-        RequestFromODS job = jobScheduler.getScheduledJobDetails(jobUuid);
-        if (job == null) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(job);
-        }
+    public ResponseEntity<RequestFromODS> getScheduledJob(@RequestParam UUID jobUuid, @RequestParam String transferNodeName) {
+
+        return ResponseEntity.ok(null);
     }
 
     @DeleteMapping("/job/delete")
     public ResponseEntity<Void> deleteScheduledJob(@RequestParam UUID jobUuid) {
-        boolean status = jobScheduler.deleteScheduledJob(jobUuid);
-        if (status) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(null);
+
     }
 
     @PostMapping(value = "/job/run")

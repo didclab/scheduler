@@ -1,69 +1,56 @@
 package com.onedatashare.scheduler.services;
 
 import com.onedatashare.scheduler.enums.EndPointType;
+import com.onedatashare.scheduler.enums.MessageType;
 import com.onedatashare.scheduler.model.TransferJobRequest;
 import com.onedatashare.scheduler.model.TransferParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class MessageSender {
     private static final Logger logger = LoggerFactory.getLogger(MessageSender.class);
+    private final ODSRouter odsRouter;
 
-    @Autowired
-    AmqpTemplate rmqTemplate;
+    @Value("${ods.default.nodes}")
+    String odsNodesGroupName;
 
-    @Autowired
-    DirectExchange directExchange;
-
-    @Value("${ods.rabbitmq.queue}")
-    private String queueName;
-
-    @Value("${ods.rabbitmq.exchange}")
-    private String exchange;
-
-    @Value("${ods.rabbitmq.routingkey}")
-    private String routingKey;
+    public MessageSender(ODSRouter odsRouter){
+        this.odsRouter = odsRouter;
+    }
 
 
-    public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
-        logger.debug(odsTransferRequest.toString());
+    public void routeTransferRequest(TransferJobRequest odsTransferRequest) {
         boolean sourceVfs = odsTransferRequest.getSource().getType().equals(EndPointType.vfs);
         boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
+        String identity = "";
         if(odsTransferRequest.getTransferNodeName() != null && !odsTransferRequest.getTransferNodeName().isEmpty()){
-            rmqTemplate.convertAndSend(exchange, odsTransferRequest.getTransferNodeName(), odsTransferRequest);
+            identity = odsTransferRequest.getTransferNodeName();
         }else if (sourceVfs || destVfs) {
             //for any vfs transfer where the user has their own transfer-service running on their metal.
-            String routingKey = this.routingKey;
             if (sourceVfs) {
-                routingKey = odsTransferRequest.getSource().getCredId().toLowerCase();
+                identity = odsTransferRequest.getSource().getCredId().toLowerCase();
             }
             if (destVfs) {
-                routingKey = odsTransferRequest.getDestination().getCredId().toLowerCase();
+                identity = odsTransferRequest.getDestination().getCredId().toLowerCase();
             }
-            logger.info("Vfs Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), routingKey);
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
         } else {
             //for all transfers that are using the ODS backend
-            logger.info("Ods Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), queueName);
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
+            identity = this.odsNodesGroupName;
         }
-        logger.info("Processed Job: {}", odsTransferRequest);
+        this.odsRouter.sendPojo(odsTransferRequest, identity, MessageType.FILE_TRANSFER_REQUEST);
     }
 
     /**
      * The Transfer params to send using the routingKey
      * @param transferParams
-     * @param routingKey
+     * @param identity
      */
-    public void sendApplicationParams(TransferParams transferParams, String routingKey) {
-        logger.info("Application Params: {} going to {}", transferParams, routingKey);
-        this.rmqTemplate.convertAndSend(routingKey, transferParams);
+    public void sendApplicationParams(TransferParams transferParams, String identity) {
+        logger.info("Application Params: {} going to {}", transferParams, identity);
+        this.odsRouter.sendPojo(transferParams, identity, MessageType.OPTIMIZATION_PARAM_CHANGE_REQUEST);
     }
 
 }
