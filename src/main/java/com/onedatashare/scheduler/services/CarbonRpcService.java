@@ -2,6 +2,7 @@ package com.onedatashare.scheduler.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.onedatashare.scheduler.enums.MessageType;
+import com.onedatashare.scheduler.model.CarbonIpEntry;
 import com.onedatashare.scheduler.model.CarbonMeasureRequest;
 import com.onedatashare.scheduler.model.CarbonMeasureResponse;
 import lombok.SneakyThrows;
@@ -13,6 +14,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -44,11 +46,8 @@ public class CarbonRpcService {
         return carbonMeasureResponse;
     }
 
-    public Map<String, Object> traceRoute(CarbonMeasureRequest carbonMeasureRequest) {
+    public List<CarbonIpEntry> traceRoute(CarbonMeasureRequest carbonMeasureRequest) {
         log.info("Sending Measure Carbon Request to: Exchange {} Routing Key {}", this.exchange, carbonMeasureRequest.transferNodeName);
-        HashMap<String, Object> respMap = this.rabbitTemplate.convertSendAndReceiveAsType(this.exchange, carbonMeasureRequest.transferNodeName, carbonMeasureRequest, MessageSender.embedMessageType(MessageType.CARBON_IP_REQUEST), new ParameterizedTypeReference<HashMap<String, Object>>() {
-        });
-        log.info("Response: {}", respMap);
-        return respMap;
+        return this.rabbitTemplate.convertSendAndReceiveAsType(this.exchange, carbonMeasureRequest.transferNodeName, carbonMeasureRequest, MessageSender.embedMessageType(MessageType.CARBON_IP_REQUEST), new ParameterizedTypeReference<List<CarbonIpEntry>>() {});
     }
 }

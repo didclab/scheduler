@@ -1,5 +1,6 @@
 package com.onedatashare.scheduler.controller;
 
+import com.onedatashare.scheduler.model.CarbonIpEntry;
 import com.onedatashare.scheduler.model.CarbonMeasureRequest;
 import com.onedatashare.scheduler.model.CarbonMeasureResponse;
 import com.onedatashare.scheduler.services.CarbonRpcService;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -27,7 +29,7 @@ public class CarbonController {
     }
 
     @GetMapping(value = "/measure/carbon/traceroute")
-    public ResponseEntity<Map<String, Object>> traceRouteCarbon(@RequestParam String transferNodeName, @RequestParam String sourceIp, @RequestParam String destinationIp) {
+    public ResponseEntity<List<CarbonIpEntry>> traceRouteCarbon(@RequestParam String transferNodeName, @RequestParam String sourceIp, @RequestParam String destinationIp) {
         CarbonMeasureRequest carbonMeasureRequest = new CarbonMeasureRequest(transferNodeName, sourceIp, destinationIp);
         return ResponseEntity.ok(this.carbonRpcService.traceRoute(carbonMeasureRequest));
 
