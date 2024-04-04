@@ -2,6 +2,7 @@ package com.onedatashare.scheduler.services;
 
 import com.onedatashare.scheduler.enums.EndPointType;
 import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
+import com.onedatashare.scheduler.model.credential.EndpointCredential;
 import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ import org.springframework.web.client.RestTemplate;
 public class CredentialService {
     private String credListUrl;
     private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
+
     @Value("${cred.service.eureka.uri}")
     String credentialEureka;
 
@@ -36,4 +38,9 @@ public class CredentialService {
         logger.info("The OAuth type is: " + type + "UserId is: " + userId + " CredId is:" + credId);
         return restTemplate.getForObject(credListUrl, OAuthEndpointCredential.class, userId, type, credId);
     }
+    public <T extends EndpointCredential> T fetchCredential(Class<T> credentialClass, EndPointType type, String userId, String credId) {
+        logger.info("Fetching credential for type: {} userId: {} credId: {}", type, userId, credId);
+        return restTemplate.getForObject(credListUrl, credentialClass, userId, type, credId);
+    }
+
 }
