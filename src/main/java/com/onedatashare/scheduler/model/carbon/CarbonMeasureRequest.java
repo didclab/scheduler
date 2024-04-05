@@ -1,4 +1,4 @@
-package com.onedatashare.scheduler.model;
+package com.onedatashare.scheduler.model.carbon;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
