@@ -101,7 +101,7 @@ public class JobScheduler {
         } else {
             transferJob.setTransferNodeName(routingKey);
         }
-
+        logger.info("Set Transfer Node Name on Job with UUID: {} to {}", id, transferJob.getTransferNodeName());
         Instant currentDate = Instant.now();
         long delay = Duration.between(LocalDateTime.now(), jobStartTime).getSeconds();
         logger.info("Now: {} \t jobStartTime: {} \t delay: {}", currentDate, jobStartTime, delay);
@@ -111,6 +111,7 @@ public class JobScheduler {
         this.jobIMap.put(id, transferJob, delay, TimeUnit.SECONDS);
         this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id, true);
         this.currentJobIdToCarbonIntensity.put(id, traceRoute);
+        logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
         return id;
     }
 
@@ -129,6 +130,7 @@ public class JobScheduler {
                 this.currentJobIdToCarbonIntensity.remove(jobId);
                 TransferJobRequest transferJobRequest = requestModifier.createRequest(transferJob);
                 messageSender.sendTransferRequest(transferJobRequest);
+                logger.info("Running Job with UUID {} now", jobId);
             }
         }
     }
@@ -153,8 +155,10 @@ public class JobScheduler {
 
     public boolean runJobCarbonSla(Double pastSla, Double currentSla, Double userSla) {
         if (userSla == -1) {
+            logger.info("No user sla: pastSla {} currentSla {}", pastSla, currentSla);
             return currentSla < pastSla;
         } else {
+            logger.info("User Sla: currentSla {} userSla {}", currentSla, userSla);
             return currentSla <= userSla;
         }
     }
