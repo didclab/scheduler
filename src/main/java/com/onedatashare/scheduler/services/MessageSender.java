@@ -1,13 +1,13 @@
 package com.onedatashare.scheduler.services;
 
-import com.onedatashare.scheduler.enums.EndPointType;
+import com.onedatashare.scheduler.enums.MessageType;
 import com.onedatashare.scheduler.model.TransferJobRequest;
 import com.onedatashare.scheduler.model.TransferParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.DirectExchange;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.amqp.core.MessagePostProcessor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,55 +15,42 @@ import org.springframework.stereotype.Service;
 public class MessageSender {
     private static final Logger logger = LoggerFactory.getLogger(MessageSender.class);
 
-    @Autowired
-    AmqpTemplate rmqTemplate;
+    RabbitTemplate rabbitTemplate;
 
-    @Autowired
     DirectExchange directExchange;
-
-    @Value("${ods.rabbitmq.queue}")
-    private String queueName;
 
     @Value("${ods.rabbitmq.exchange}")
     private String exchange;
 
-    @Value("${ods.rabbitmq.routingkey}")
-    private String routingKey;
+    public MessageSender(RabbitTemplate rmqTemplate, DirectExchange directExchange) {
+        this.rabbitTemplate = rmqTemplate;
+        this.directExchange = directExchange;
+    }
 
 
     public void sendTransferRequest(TransferJobRequest odsTransferRequest) {
-        logger.debug(odsTransferRequest.toString());
-        boolean sourceVfs = odsTransferRequest.getSource().getType().equals(EndPointType.vfs);
-        boolean destVfs = odsTransferRequest.getDestination().getType().equals(EndPointType.vfs);
-        if(odsTransferRequest.getTransferNodeName() != null && !odsTransferRequest.getTransferNodeName().isEmpty()){
-            rmqTemplate.convertAndSend(exchange, odsTransferRequest.getTransferNodeName(), odsTransferRequest);
-        }else if (sourceVfs || destVfs) {
-            //for any vfs transfer where the user has their own transfer-service running on their metal.
-            String routingKey = this.routingKey;
-            if (sourceVfs) {
-                routingKey = odsTransferRequest.getSource().getCredId().toLowerCase();
-            }
-            if (destVfs) {
-                routingKey = odsTransferRequest.getDestination().getCredId().toLowerCase();
-            }
-            logger.info("Vfs Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), routingKey);
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
-        } else {
-            //for all transfers that are using the ODS backend
-            logger.info("Ods Request: user={}, routeKey={}", odsTransferRequest.getOwnerId(), queueName);
-            rmqTemplate.convertAndSend(exchange, routingKey, odsTransferRequest);
-        }
+        MessagePostProcessor postProcessor = MessageSender.embedMessageType(MessageType.TRANSFER_JOB_REQUEST);
+        rabbitTemplate.convertAndSend(exchange, odsTransferRequest.getTransferNodeName(), odsTransferRequest, postProcessor);
         logger.info("Processed Job: {}", odsTransferRequest);
     }
 
     /**
      * The Transfer params to send using the routingKey
+     *
      * @param transferParams
      * @param routingKey
      */
     public void sendApplicationParams(TransferParams transferParams, String routingKey) {
         logger.info("Application Params: {} going to {}", transferParams, routingKey);
-        this.rmqTemplate.convertAndSend(routingKey, transferParams);
+        MessagePostProcessor postProcessor = MessageSender.embedMessageType(MessageType.APPLICATION_PARAM_CHANGE);
+        this.rabbitTemplate.convertAndSend(routingKey, transferParams, postProcessor);
+    }
+
+    public static MessagePostProcessor embedMessageType(MessageType type) {
+        return message -> {
+            message.getMessageProperties().getHeaders().put("type", type);
+            return message;
+        };
     }
 
 }

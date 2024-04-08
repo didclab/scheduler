@@ -43,8 +43,8 @@ public class RequestModifier {
     @Autowired
     StaticOptimizer staticOptimizer;
 
-    Set<String> nonOautUsingType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
-    Set<String> oautUsingType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
+    public static Set<String> vfsCredType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
+    public static Set<String> oAuthType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources) {
         logger.info("The info list in select and expand is \n" + selectedResources.toString());
@@ -132,17 +132,17 @@ public class RequestModifier {
         d.setCredId(odsTransferRequest.getDestination().getCredId());
         d.setType(odsTransferRequest.getDestination().getType());
 
-        if (nonOautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
+        if (vfsCredType.contains(odsTransferRequest.getSource().getType().toString())) {
             AccountEndpointCredential sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setVfsSourceCredential(sourceCredential);
-        } else if (oautUsingType.contains(odsTransferRequest.getSource().getType().toString())) {
+        } else if (oAuthType.contains(odsTransferRequest.getSource().getType().toString())) {
             OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
             s.setOauthSourceCredential(sourceCredential);
         }
-        if (nonOautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
+        if (vfsCredType.contains(odsTransferRequest.getDestination().getType().toString())) {
             AccountEndpointCredential destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setVfsDestCredential(destinationCredential);
-        } else if (oautUsingType.contains(odsTransferRequest.getDestination().getType().toString())) {
+        } else if (oAuthType.contains(odsTransferRequest.getDestination().getType().toString())) {
             OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
             d.setOauthDestCredential(destinationCredential);
         }

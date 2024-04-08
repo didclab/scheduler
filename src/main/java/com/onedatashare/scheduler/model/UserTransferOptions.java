@@ -18,6 +18,7 @@ public class UserTransferOptions implements Serializable {
     private Integer parallelThreadCount;
     private Integer pipeSize;
     private Integer chunkSize;
+    private Integer userDesiredCarbonIntensity;
 
     public UserTransferOptions() {
         this.compress = false;
@@ -30,6 +31,7 @@ public class UserTransferOptions implements Serializable {
         this.parallelThreadCount = 0;
         this.pipeSize = 0;
         this.chunkSize = 0;
+        this.userDesiredCarbonIntensity = -1;
     }
 
 }
