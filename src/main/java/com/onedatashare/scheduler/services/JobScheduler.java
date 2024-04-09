@@ -94,11 +94,11 @@ public class JobScheduler {
         boolean destVfs = transferRequest.getDestination().getType().toString().equals(EndPointType.vfs.toString());
         String transferNodeName = odsQueue;
         if (transferRequest.getTransferNodeName() != null || !transferRequest.getTransferNodeName().isEmpty()) {
-            transferJob.setTransferNodeName(transferRequest.getTransferNodeName());
+            transferNodeName = transferRequest.getTransferNodeName();
         } else if (sourceVfs) {
-            transferJob.setTransferNodeName(transferRequest.getSource().getCredId());
+            transferNodeName = transferRequest.getSource().getCredId();
         } else if (destVfs) {
-            transferJob.setTransferNodeName(transferRequest.getDestination().getCredId());
+            transferNodeName = transferRequest.getDestination().getCredId();
         }
         transferJob.setTransferNodeName(transferNodeName);
         logger.info("Set Transfer Node Name on Job with UUID: {} to {}", id, transferJob.getTransferNodeName());
