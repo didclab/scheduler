@@ -36,8 +36,8 @@ public class JobScheduler {
     private EntryExpiredHazelcast entryExpiredHazelcast;
     Logger logger = LoggerFactory.getLogger(JobScheduler.class);
 
-    @Value("${ods.rabbitmq.routingkey}")
-    private String routingKey;
+    @Value("${ods.rabbitmq.queue}")
+    private String odsQueue;
 
     @Autowired
     CarbonRpcService carbonRpcService;
@@ -92,7 +92,7 @@ public class JobScheduler {
         //assign the job to a node: either the user tells us which, its an ODS Connector(vfs) or we just use one of the ODS running nodes(routing key)
         boolean sourceVfs = transferRequest.getSource().getType().equals(EndPointType.vfs);
         boolean destVfs = transferRequest.getDestination().getType().equals(EndPointType.vfs);
-        String transferNodeName = routingKey;
+        String transferNodeName = odsQueue;
         if (transferRequest.getTransferNodeName() != null || !transferRequest.getTransferNodeName().isEmpty()) {
             transferJob.setTransferNodeName(transferRequest.getTransferNodeName());
         } else if (sourceVfs) {
