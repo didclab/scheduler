@@ -43,8 +43,8 @@ public class RequestModifier {
     @Autowired
     StaticOptimizer staticOptimizer;
 
-    public static Set<String> vfsCredType = new HashSet<>(Arrays.asList(new String[]{"ftp", "sftp", "http", "s3"}));
-    public static Set<String> oAuthType = new HashSet<>(Arrays.asList(new String[]{"dropbox", "box", "gdrive", "gftp"}));
+    public static Set<EndPointType> vfsCredType = new HashSet<>(Arrays.asList(new EndPointType[]{EndPointType.s3, EndPointType.ftp, EndPointType.sftp, EndPointType.http, EndPointType.scp}));
+    public static Set<EndPointType> oAuthType = new HashSet<>(Arrays.asList(new EndPointType[]{EndPointType.dropbox, EndPointType.box, EndPointType.gdrive}));
 
     public List<EntityInfo> selectAndExpand(TransferJobRequest.Source source, List<EntityInfo> selectedResources) {
         logger.info("The info list in select and expand is \n" + selectedResources.toString());
@@ -132,20 +132,25 @@ public class RequestModifier {
         d.setCredId(odsTransferRequest.getDestination().getCredId());
         d.setType(odsTransferRequest.getDestination().getType());
 
-        if (vfsCredType.contains(odsTransferRequest.getSource().getType().toString())) {
-            AccountEndpointCredential sourceCredential = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
-            s.setVfsSourceCredential(sourceCredential);
-        } else if (oAuthType.contains(odsTransferRequest.getSource().getType().toString())) {
-            OAuthEndpointCredential sourceCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
-            s.setOauthSourceCredential(sourceCredential);
+
+        switch (odsTransferRequest.getSource().getType()) {
+            case scp, http, ftp, sftp, s3:
+                AccountEndpointCredential sourceAccountCred = credentialService.fetchAccountCredential(odsTransferRequest.getSource().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+                s.setVfsSourceCredential(sourceAccountCred);
+            case gdrive, box, dropbox:
+                OAuthEndpointCredential sourceOAuthCred = credentialService.fetchOAuthCredential(odsTransferRequest.getSource().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getSource().getCredId());
+                s.setOauthSourceCredential(sourceOAuthCred);
         }
-        if (vfsCredType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            AccountEndpointCredential destinationCredential = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
-            d.setVfsDestCredential(destinationCredential);
-        } else if (oAuthType.contains(odsTransferRequest.getDestination().getType().toString())) {
-            OAuthEndpointCredential destinationCredential = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
-            d.setOauthDestCredential(destinationCredential);
+
+        switch (odsTransferRequest.getDestination().getType()) {
+            case scp, http, ftp, sftp, s3:
+                AccountEndpointCredential destAccountCred = credentialService.fetchAccountCredential(odsTransferRequest.getDestination().getType().toString(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
+                d.setVfsDestCredential(destAccountCred);
+            case gdrive, box, dropbox:
+                OAuthEndpointCredential destOAuthCred = credentialService.fetchOAuthCredential(odsTransferRequest.getDestination().getType(), odsTransferRequest.getOwnerId(), odsTransferRequest.getDestination().getCredId());
+                d.setOauthDestCredential(destOAuthCred);
         }
+
         List<EntityInfo> expandedFiles = this.selectAndExpand(s, odsTransferRequest.getSource().getResourceList());
         logger.info("Expanded files: {}", expandedFiles);
         expandedFiles = this.checkDestinationChunkSize(expandedFiles, d, odsTransferRequest.getOptions().getChunkSize());

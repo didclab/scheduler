@@ -110,8 +110,10 @@ public class JobScheduler {
         List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, id);
         this.jobIMap.put(id, transferJob, delay, TimeUnit.SECONDS);
         this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id, true);
-        this.currentJobIdToCarbonIntensity.put(id, traceRoute);
-        logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
+        if(delay > 0){
+            this.currentJobIdToCarbonIntensity.put(id, traceRoute);
+            logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
+        }
         return id;
     }
 
