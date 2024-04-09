@@ -81,6 +81,7 @@ public class JobScheduler {
         if (transferRequest == null) {
             return null;
         }
+        logger.info("Request from ODS DTO: {}", transferRequest);
         UUID id = UUID.randomUUID();
         RequestFromODS transferJob = new RequestFromODS();
         transferJob.setOptions(transferRequest.getOptions());
@@ -93,7 +94,7 @@ public class JobScheduler {
         boolean sourceVfs = transferRequest.getSource().getType().toString().equals(EndPointType.vfs.toString());
         boolean destVfs = transferRequest.getDestination().getType().toString().equals(EndPointType.vfs.toString());
         String transferNodeName = odsQueue;
-        if (transferRequest.getTransferNodeName() != null || !transferRequest.getTransferNodeName().isEmpty()) {
+        if (transferRequest.getTransferNodeName() != null && !transferRequest.getTransferNodeName().isEmpty()) {
             transferNodeName = transferRequest.getTransferNodeName();
         } else if (sourceVfs) {
             transferNodeName = transferRequest.getSource().getCredId();
