@@ -105,15 +105,16 @@ public class JobScheduler {
         Instant currentDate = Instant.now();
         long delay = Duration.between(LocalDateTime.now(), jobStartTime).getSeconds();
         logger.info("Now: {} \t jobStartTime: {} \t delay: {}", currentDate, jobStartTime, delay);
-        if (delay < 0) delay = 1;
-
-        List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, id);
-        this.jobIMap.put(id, transferJob, delay, TimeUnit.SECONDS);
-        this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id, true);
-        if(delay > 0){
+        if(delay > 0) {
+            List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, id);
             this.currentJobIdToCarbonIntensity.put(id, traceRoute);
             logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
         }
+
+        if (delay < 0) delay = 1;
+        this.jobIMap.put(id, transferJob, delay, TimeUnit.SECONDS);
+        this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id, true);
+
         return id;
     }
 
@@ -138,16 +139,16 @@ public class JobScheduler {
     }
 
     public List<CarbonIpEntry> measureCarbonForJob(RequestFromODS requestFromODS, UUID jobUuid) {
-        EndpointCredential sourceCred;
-        EndpointCredential destCred;
-        if (RequestModifier.vfsCredType.contains(requestFromODS.getSource().getType().toString())) {
+        EndpointCredential sourceCred =  null;
+        EndpointCredential destCred = null;
+        if (RequestModifier.vfsCredType.contains(requestFromODS.getSource().getType())) {
             sourceCred = credentialService.fetchAccountCredential(requestFromODS.getSource().getType().toString(), requestFromODS.getOwnerId(), requestFromODS.getSource().getCredId());
-        } else {
+        } else if(RequestModifier.oAuthType.contains(requestFromODS.getSource().getType())){
             sourceCred = credentialService.fetchOAuthCredential(requestFromODS.getSource().getType(), requestFromODS.getOwnerId(), requestFromODS.getSource().getCredId());
         }
-        if (RequestModifier.vfsCredType.contains(requestFromODS.getDestination().getType().toString())) {
+        if (RequestModifier.vfsCredType.contains(requestFromODS.getDestination().getType())) {
             destCred = credentialService.fetchAccountCredential(requestFromODS.getDestination().getType().toString(), requestFromODS.getOwnerId(), requestFromODS.getDestination().getCredId());
-        } else {
+        } else if(RequestModifier.oAuthType.contains(requestFromODS.getDestination().getType())){
             destCred = credentialService.fetchOAuthCredential(requestFromODS.getDestination().getType(), requestFromODS.getOwnerId(), requestFromODS.getDestination().getCredId());
         }
         String sourceUri = ODSConstants.uriFromEndpointCredential(sourceCred, requestFromODS.getSource().getType());

@@ -16,12 +16,10 @@ public class ODSConstants {
             case scp:
             case http:
                 ac = (AccountEndpointCredential) credential;
-                URI uri = URI.create(ac.getUri());
-                return uri.getHost();
+                return URI.create(ac.getUri()).getHost();
             case s3:
                 ac = (AccountEndpointCredential) credential;
-                URI s3Uri = URI.create(constructS3URI(ac.getUri(), ""));
-                return s3Uri.getHost();
+                return URI.create(constructS3URI(ac.getUri(), "")).getHost();
             case box:
                 return "box.com";
             case dropbox:
