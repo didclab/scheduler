@@ -92,15 +92,15 @@ public class JobScheduler {
         //assign the job to a node: either the user tells us which, its an ODS Connector(vfs) or we just use one of the ODS running nodes(routing key)
         boolean sourceVfs = transferRequest.getSource().getType().equals(EndPointType.vfs);
         boolean destVfs = transferRequest.getDestination().getType().equals(EndPointType.vfs);
+        String transferNodeName = routingKey;
         if (transferRequest.getTransferNodeName() != null || !transferRequest.getTransferNodeName().isEmpty()) {
             transferJob.setTransferNodeName(transferRequest.getTransferNodeName());
         } else if (sourceVfs) {
             transferJob.setTransferNodeName(transferRequest.getSource().getCredId());
         } else if (destVfs) {
             transferJob.setTransferNodeName(transferRequest.getDestination().getCredId());
-        } else {
-            transferJob.setTransferNodeName(routingKey);
         }
+        transferJob.setTransferNodeName(transferNodeName);
         logger.info("Set Transfer Node Name on Job with UUID: {} to {}", id, transferJob.getTransferNodeName());
         Instant currentDate = Instant.now();
         long delay = Duration.between(LocalDateTime.now(), jobStartTime).getSeconds();
