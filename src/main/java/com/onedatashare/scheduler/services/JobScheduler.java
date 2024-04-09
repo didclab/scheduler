@@ -90,8 +90,8 @@ public class JobScheduler {
         transferJob.setJobUuid(id);
         transferJob.setJobStartTime(jobStartTime);
         //assign the job to a node: either the user tells us which, its an ODS Connector(vfs) or we just use one of the ODS running nodes(routing key)
-        boolean sourceVfs = transferRequest.getSource().getType().equals(EndPointType.vfs);
-        boolean destVfs = transferRequest.getDestination().getType().equals(EndPointType.vfs);
+        boolean sourceVfs = transferRequest.getSource().getType().toString().equals(EndPointType.vfs.toString());
+        boolean destVfs = transferRequest.getDestination().getType().toString().equals(EndPointType.vfs.toString());
         String transferNodeName = odsQueue;
         if (transferRequest.getTransferNodeName() != null || !transferRequest.getTransferNodeName().isEmpty()) {
             transferJob.setTransferNodeName(transferRequest.getTransferNodeName());
