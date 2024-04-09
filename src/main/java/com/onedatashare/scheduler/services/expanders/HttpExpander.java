@@ -35,61 +35,65 @@ public class HttpExpander extends DestinationChunkSize implements FileExpander {
         logger.info(this.credential.toString());
     }
 
-    @SneakyThrows
     @Override
     public List<EntityInfo> expandedFileSystem(List<EntityInfo> userSelectedResources, String basePath) {
         List<EntityInfo> filesToSend = new ArrayList<>();
         Stack<Element> directoriesToTraverse = new Stack<>();
         if (basePath.isEmpty()) basePath = "/";
-        if (userSelectedResources.isEmpty()) { //we move the whole damn server
-            logger.info("User resources is empty gonna just send the whole server I guess");
-            Document doc = Jsoup.connect(this.credential.getUri() + basePath).get();
-            Elements links = doc.select("body a");
-            for (Element elem : links) {
-                if (elem.text().endsWith("/")) { //directory to expand
-                    directoriesToTraverse.push(elem);
-                } else { //we have a file
-                    filesToSend.add(fromElement(elem));
-                }
-            }
-        } else { //move only files/folders the user selected
-            for (EntityInfo selectedFiles : userSelectedResources) {
-                //we have a folder to transfer
-                if(selectedFiles.getPath().endsWith("/")){
-
-                    Document doc = Jsoup.connect(this.credential.getUri() + basePath + selectedFiles.getPath())
-                            .ignoreContentType(true)
-                            .get();
-                    logger.info(doc.toString());
-                    Elements links = doc.select("body a");
-                    for (Element elem : links) {
-                        if (elem.text().endsWith("/")) { //directory to expand
-                            directoriesToTraverse.push(elem);
-                        } else { //we have a file
-                            filesToSend.add(fromElement(elem));
-                        }
+        try {
+            if (userSelectedResources.isEmpty()) { //we move the whole damn server
+                logger.info("User resources is empty gonna just send the whole server I guess");
+                Document doc = Jsoup.connect(this.credential.getUri() + basePath).get();
+                Elements links = doc.select("body a");
+                for (Element elem : links) {
+                    if (elem.text().endsWith("/")) { //directory to expand
+                        directoriesToTraverse.push(elem);
+                    } else { //we have a file
+                        filesToSend.add(fromElement(elem));
                     }
-                }else{
-                    filesToSend.add(this.fileToInfo(this.credential.getUri() + Paths.get(basePath, selectedFiles.getPath()).toString()));
+                }
+            } else { //move only files/folders the user selected
+                for (EntityInfo selectedFiles : userSelectedResources) {
+                    //we have a folder to transfer
+                    if (selectedFiles.getPath().endsWith("/")) {
+
+                        Document doc = Jsoup.connect(this.credential.getUri() + basePath + selectedFiles.getPath())
+                                .ignoreContentType(true)
+                                .get();
+                        logger.info(doc.toString());
+                        Elements links = doc.select("body a");
+                        for (Element elem : links) {
+                            if (elem.text().endsWith("/")) { //directory to expand
+                                directoriesToTraverse.push(elem);
+                            } else { //we have a file
+                                filesToSend.add(fromElement(elem));
+                            }
+                        }
+                    } else {
+                        filesToSend.add(this.fileToInfo(this.credential.getUri() + Paths.get(basePath, selectedFiles.getPath()).toString()));
+                    }
                 }
             }
-        }
-        //all of these have names that should be appended to the path
-        while (!directoriesToTraverse.isEmpty()) {
-            Element directory = directoriesToTraverse.pop();
-            if (directory.text().contains("..") || directory.text().contains(".")) {
-                continue;
-            }
-            logger.info(directory.baseUri() + directory.text());
-            Document doc = Jsoup.connect(directory.baseUri() + basePath +directory.text()).get();
-            Elements links = doc.select("body a");
-            for (Element elem : links) {
-                if (elem.text().endsWith("/")) { //directory to expand
-                    directoriesToTraverse.push(elem);
-                } else { //we have a file
-                    filesToSend.add(fromElement(elem));
+            //all of these have names that should be appended to the path
+            while (!directoriesToTraverse.isEmpty()) {
+                Element directory = directoriesToTraverse.pop();
+                if (directory.text().contains("..") || directory.text().contains(".")) {
+                    continue;
+                }
+                logger.info(directory.baseUri() + directory.text());
+                Document doc = Jsoup.connect(directory.baseUri() + basePath + directory.text()).get();
+                Elements links = doc.select("body a");
+                for (Element elem : links) {
+                    if (elem.text().endsWith("/")) { //directory to expand
+                        directoriesToTraverse.push(elem);
+                    } else { //we have a file
+                        filesToSend.add(fromElement(elem));
+                    }
                 }
             }
+        } catch (IOException e){
+            logger.error("Failed to Expand ip: {} will expand on the TransferNode instead", this.credential.getUri());
+            return userSelectedResources;
         }
         return filesToSend;
     }
