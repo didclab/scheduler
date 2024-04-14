@@ -1,8 +1,8 @@
 package com.onedatashare.scheduler.model;
 
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
+import com.onedatashare.commonservice.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.enums.EndPointType;
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
-import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
 import lombok.*;
 
 import javax.annotation.Nullable;

@@ -1,8 +1,8 @@
 package com.onedatashare.scheduler.services;
 
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
+import com.onedatashare.commonservice.model.credential.EndpointCredential;
 import com.onedatashare.scheduler.enums.EndPointType;
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
-import com.onedatashare.scheduler.model.credential.EndpointCredential;
 
 import java.net.URI;
 

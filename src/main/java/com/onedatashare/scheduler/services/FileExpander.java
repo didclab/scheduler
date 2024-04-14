@@ -1,7 +1,7 @@
 package com.onedatashare.scheduler.services;
 
+import com.onedatashare.commonservice.model.credential.EndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
-import com.onedatashare.scheduler.model.credential.EndpointCredential;
 
 import java.util.List;
 

@@ -1,8 +1,11 @@
 package com.onedatashare.scheduler.services.expanders;
 
-import com.jcraft.jsch.*;
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
-import com.onedatashare.scheduler.model.credential.EndpointCredential;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
+import com.onedatashare.commonservice.model.credential.EndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.services.DestinationChunkSize;
 import com.onedatashare.scheduler.services.FileExpander;

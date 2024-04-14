@@ -4,7 +4,7 @@ import com.box.sdk.BoxAPIConnection;
 import com.box.sdk.BoxFile;
 import com.box.sdk.BoxFolder;
 import com.box.sdk.BoxItem;
-import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
+import com.onedatashare.commonservice.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.services.expanders.BoxExpander;
 import junit.framework.TestCase;

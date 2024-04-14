@@ -1,7 +1,7 @@
 package com.onedatashare.scheduler.services;
 
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.services.expanders.FTPExpander;
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
 import junit.framework.TestCase;
 import org.springframework.util.Assert;

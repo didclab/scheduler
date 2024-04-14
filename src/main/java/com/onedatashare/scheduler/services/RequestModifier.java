@@ -1,12 +1,12 @@
 package com.onedatashare.scheduler.services;
 
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
+import com.onedatashare.commonservice.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.enums.EndPointType;
 import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.model.RequestFromODS;
 import com.onedatashare.scheduler.model.TransferJobRequest;
 import com.onedatashare.scheduler.model.TransferOptions;
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
-import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.services.expanders.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

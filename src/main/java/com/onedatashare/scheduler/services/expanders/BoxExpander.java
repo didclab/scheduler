@@ -1,8 +1,8 @@
 package com.onedatashare.scheduler.services.expanders;
 
 import com.box.sdk.*;
-import com.onedatashare.scheduler.model.credential.EndpointCredential;
-import com.onedatashare.scheduler.model.credential.OAuthEndpointCredential;
+import com.onedatashare.commonservice.model.credential.EndpointCredential;
+import com.onedatashare.commonservice.model.credential.OAuthEndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.services.DestinationChunkSize;
 import com.onedatashare.scheduler.services.FileExpander;

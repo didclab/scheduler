@@ -1,8 +1,8 @@
 package com.onedatashare.scheduler.services;
 
 import com.onedatashare.scheduler.model.EntityInfo;
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
 import com.onedatashare.scheduler.services.expanders.HttpExpander;
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
 import junit.framework.TestCase;
 import org.junit.Assert;
 

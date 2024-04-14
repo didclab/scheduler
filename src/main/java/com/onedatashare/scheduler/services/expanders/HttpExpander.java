@@ -1,11 +1,10 @@
 package com.onedatashare.scheduler.services.expanders;
 
-import com.onedatashare.scheduler.model.credential.AccountEndpointCredential;
-import com.onedatashare.scheduler.model.credential.EndpointCredential;
+import com.onedatashare.commonservice.model.credential.AccountEndpointCredential;
+import com.onedatashare.commonservice.model.credential.EndpointCredential;
 import com.onedatashare.scheduler.model.EntityInfo;
 import com.onedatashare.scheduler.services.DestinationChunkSize;
 import com.onedatashare.scheduler.services.FileExpander;
-import lombok.SneakyThrows;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

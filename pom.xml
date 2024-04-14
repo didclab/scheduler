@@ -104,6 +104,11 @@
             <artifactId>jsoup</artifactId>
             <version>1.16.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.onedatashare</groupId>
+            <artifactId>common-service</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 
     </dependencies>
     <dependencyManagement>
