@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class JobScheduler {
 
-    protected IMap<UUID, RequestFromODS> jobIMap; // the map that stores the scheduled jobs
-    public IMap<UUID, List<CarbonIpEntry>> currentJobIdToCarbonIntensity; //scheduling in time is abusing this map.
+    protected IMap<String, RequestFromODS> jobIMap; // the map that stores the scheduled jobs
+    public IMap<String, List<CarbonIpEntry>> currentJobIdToCarbonIntensity; //scheduling in time is abusing this map.
 
     private EntryExpiredHazelcast entryExpiredHazelcast;
     Logger logger = LoggerFactory.getLogger(JobScheduler.class);
@@ -60,7 +60,7 @@ public class JobScheduler {
 
     public Collection<RequestFromODS> listScheduledJobs(String userEmail) {
         PredicateBuilder.EntryObject e = Predicates.newPredicateBuilder().getEntryObject();
-        Predicate<UUID, RequestFromODS> predicate = entry -> entry.getValue().getOwnerId().equals(userEmail);
+        Predicate<String, RequestFromODS> predicate = entry -> entry.getValue().getOwnerId().equals(userEmail);
         return this.jobIMap.values(predicate);
     }
 
@@ -105,22 +105,22 @@ public class JobScheduler {
         Instant currentDate = Instant.now();
         long delay = Duration.between(LocalDateTime.now(), jobStartTime).getSeconds();
         logger.info("Now: {} \t jobStartTime: {} \t delay: {}", currentDate, jobStartTime, delay);
-        if(delay > 0) {
-            List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, id);
-            this.currentJobIdToCarbonIntensity.put(id, traceRoute);
-            logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
-        }
-
-        if (delay < 0) delay = 1;
-        this.jobIMap.put(id, transferJob, delay, TimeUnit.SECONDS);
-        this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id, true);
+//        if(delay > 0) {
+//            List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, id);
+//            this.currentJobIdToCarbonIntensity.put(id, traceRoute);
+//            logger.info("Job with UUID: {} has carbon intensity of {}", id, this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute));
+//        }
+//
+//        if (delay < 0) delay = 1;
+        this.jobIMap.put(id.toString(), transferJob, delay, TimeUnit.SECONDS);
+        this.jobIMap.addEntryListener(this.entryExpiredHazelcast, id.toString(), true);
 
         return id;
     }
 
     @Scheduled(cron = "* */30 * * *")
     public void measureCarbonForQueuedJobs() {
-        for (UUID jobId : this.jobIMap.keySet()) {
+        for (String jobId : this.jobIMap.keySet()) {
             RequestFromODS transferJob = this.jobIMap.get(jobId);
             List<CarbonIpEntry> traceRoute = this.measureCarbonForJob(transferJob, jobId);
             Double currentIntensity = this.carbonRpcService.averageCarbonIntensityOfTraceRoute(traceRoute);
@@ -138,7 +138,7 @@ public class JobScheduler {
         }
     }
 
-    public List<CarbonIpEntry> measureCarbonForJob(RequestFromODS requestFromODS, UUID jobUuid) {
+    public List<CarbonIpEntry> measureCarbonForJob(RequestFromODS requestFromODS, String jobUuid) {
         EndpointCredential sourceCred =  null;
         EndpointCredential destCred = null;
         if (RequestModifier.vfsCredType.contains(requestFromODS.getSource().getType())) {
