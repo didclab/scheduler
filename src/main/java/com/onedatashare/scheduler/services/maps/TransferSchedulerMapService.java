@@ -10,12 +10,10 @@ import com.hazelcast.map.IMap;
 import com.hazelcast.query.LocalIndexStats;
 import com.hazelcast.query.PredicateBuilder;
 import com.hazelcast.query.Predicates;
-import com.onedatashare.scheduler.enums.MessageType;
 import com.onedatashare.scheduler.model.TransferJobRequest;
 import com.onedatashare.scheduler.services.MessageSender;
 import com.onedatashare.scheduler.services.listeners.EntryExpiredHazelcast;
 import jakarta.annotation.PostConstruct;
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,14 +29,12 @@ public class TransferSchedulerMapService {
 
     private final IMap<UUID, HazelcastJsonValue> jobScheduleMap;
     private final ObjectMapper objectMapper;
-    private final MessageSender messageSender;
     private Logger logger = LoggerFactory.getLogger(TransferSchedulerMapService.class);
 
     public TransferSchedulerMapService(@Qualifier("hazelcastInstance") HazelcastInstance hazelcastInstance, ObjectMapper objectMapper, MessageSender messageSender) {
         this.jobScheduleMap = hazelcastInstance.getMap("file-transfer-schedule-map");
         this.objectMapper = objectMapper;
         this.jobScheduleMap.addEntryListener(new EntryExpiredHazelcast(messageSender), true);
-        this.messageSender = messageSender;
     }
 
     @PostConstruct
@@ -82,16 +78,14 @@ public class TransferSchedulerMapService {
         this.jobScheduleMap.delete(jobUuid);
     }
 
-    @SneakyThrows
     public void putJob(TransferJobRequest transferJobRequest, LocalDateTime jobStartTime) throws JsonProcessingException {
         long delay = Duration.between(LocalDateTime.now(), jobStartTime).getSeconds();
+        if(delay < 0) {
+            delay = 1;
+        }
         String jsonRequestValue = this.objectMapper.writeValueAsString(transferJobRequest);
         logger.info("Putting File Transfer Job in Map: \n {}", jsonRequestValue);
-        if(delay < 0) {
-            this.messageSender.sendMessage(transferJobRequest, MessageType.TRANSFER_JOB_REQUEST, transferJobRequest.getTransferNodeName());
-        }else{
-            this.jobScheduleMap.put(transferJobRequest.getJobUuid(), new HazelcastJsonValue(jsonRequestValue), delay, TimeUnit.SECONDS);
-        }
+        this.jobScheduleMap.put(transferJobRequest.getJobUuid(), new HazelcastJsonValue(jsonRequestValue), delay, TimeUnit.SECONDS);
     }
 
     public boolean containsKey(UUID jobUuid) {
