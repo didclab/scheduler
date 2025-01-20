@@ -18,7 +18,7 @@ dockerfile
 
 # Ignore compiled files
 /target/
-src/test/
+#src/test/
 
 # Ignore application properties
 src/main/resources/application-dev.properties
