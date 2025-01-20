@@ -1,4 +1,25 @@
-#intellij files
+# Ignore
+boot.sh
+*.env
+HELP.md
+README.md
+pom.xml
+dockerfile
+
+# Ignore IDE/Editor-specific files
 .idea/
-target/
-scheduler-dev.env
+.vscode/
+
+# Ignore logs and temporary files
+*.log
+*.tmp
+*.swp
+*.yml
+
+# Ignore compiled files
+/target/
+src/test/
+
+# Ignore application properties
+src/main/resources/application-dev.properties
+src/main/resources/application-prod.properties
